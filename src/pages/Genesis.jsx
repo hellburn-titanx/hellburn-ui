@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { useWallet } from "@/hooks/useWallet";
 import { useGenesis, useTitanX, useHBURN } from "@/hooks/useContracts";
-import { ADDRESSES, WEEKS, TITANX_DISTRIBUTION, GENESIS_DURATION_DAYS } from "@/config/constants";
-import { fmt, bn, toWei, calcGenesisOutput, timeLeft } from "@/utils";
+import { ADDRESSES, WEEKS, TITANX_DISTRIBUTION, GENESIS_DURATION_DAYS, GENESIS_DURATION_HOURS } from "@/config/constants";
+import { fmt, fmtETH, bn, toWei, calcGenesisOutput, timeLeft } from "@/utils";
 import TxModal from "@/components/TxModal";
 
 export default function Genesis() {
@@ -83,19 +83,21 @@ export default function Genesis() {
   }, [genesis, claimable]);
 
   const setPct = (p) => setInput(Math.floor(balNum * p / 100).toString());
-  const genesisActive = stats && !stats.ended;
-  const daysLeft = stats ? Math.max(0, Math.ceil((Number(stats.end) - Date.now() / 1000) / 86400)) : 0;
-  const progressPct = stats ? Math.min(100, ((GENESIS_DURATION_DAYS - daysLeft) / GENESIS_DURATION_DAYS) * 100) : 0;
+  const now = Math.floor(Date.now() / 1000);
+  const genesisActive = stats && !stats.ended && now <= Number(stats.end);
+  const hoursLeft = stats ? Math.max(0, ((Number(stats.end) - Date.now() / 1000) / 3600).toFixed(1)) : 0;
+  const progressPct = stats ? Math.min(100, ((GENESIS_DURATION_HOURS - hoursLeft) / GENESIS_DURATION_HOURS) * 100) : 0;
 
   return (
     <div className="space-y-6">
       <div className="text-center mb-6">
         <h1 className="font-display font-black text-4xl tracking-tight">
+          <span className="inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold bg-fire-1/20 text-fire-3 border border-fire-2/40 mr-2 align-middle">1</span>
           <span className="fire-text">Genesis</span> Burn
         </h1>
         <p className="text-txt-2 text-sm mt-2">
           Burn TitanX → Mint HBURN. Week {week}/4.{" "}
-          {genesisActive ? `${daysLeft} days left.` : "Genesis ended."}
+          {genesisActive ? `${hoursLeft}h left.` : "Genesis ended — minting closed."}
         </p>
       </div>
 
@@ -111,7 +113,7 @@ export default function Genesis() {
       <div className="hb-card">
         <div className="hb-progress"><div className="hb-progress-fill" style={{ width: `${progressPct}%` }} /></div>
         <div className="flex justify-between mt-2 text-[10px] text-txt-3 tracking-wider">
-          <span>DAY {GENESIS_DURATION_DAYS - daysLeft}</span><span>DAY {GENESIS_DURATION_DAYS}</span>
+          <span>HOUR {Math.round(GENESIS_DURATION_HOURS - hoursLeft)}</span><span>HOUR {GENESIS_DURATION_HOURS}</span>
         </div>
       </div>
 
@@ -120,52 +122,75 @@ export default function Genesis() {
         <div className="hb-card">
           <div className="hb-label"><span className="dot" /> Burn TitanX</div>
 
-          {/* Week Indicator */}
-          <div className="flex gap-1.5 mb-5">
-            {WEEKS.map((w) => (
-              <div key={w.week} className={`flex-1 py-3 px-2 rounded-xl text-center text-xs border transition-all relative ${
-                w.week === week ? "bg-fire-1/10 border-fire-2 text-fire-3 shadow-[0_0_20px_rgba(255,69,0,0.1)]" : "bg-dark-3 border-dark-5 text-txt-2"
-              }`}>
-                <span className="font-bold text-sm block">W{w.week}</span>
-                <span className="opacity-70">{w.label}</span>
-                {w.bonus > 100 && (
-                  <span className="absolute -top-2 -right-1 bg-fire-1 text-white text-[9px] px-1.5 py-0.5 rounded font-bold">
-                    {w.bonusLabel}
-                  </span>
-                )}
+          {!genesisActive ? (
+            /* ── Genesis Ended State ───────────────────────── */
+            <div className="text-center py-8">
+              <div className="text-5xl mb-4">🔒</div>
+              <h3 className="font-display font-bold text-lg text-txt-1 mb-2">Genesis Minting Closed</h3>
+              <p className="text-sm text-txt-2 mb-4">
+                The Genesis phase has ended. No more HBURN can be minted.
+              </p>
+              <div className="hb-output mb-4">
+                <div className="hb-output-row"><span className="text-xs text-txt-2">Total TitanX Burned</span><span className="font-bold text-fire-3">{stats ? fmt(stats.burned) : "—"}</span></div>
+                <div className="hb-output-row"><span className="text-xs text-txt-2">Total HBURN Minted</span><span className="font-bold text-green-400">{stats ? fmt(stats.minted) : "—"}</span></div>
               </div>
-            ))}
-          </div>
+              {claimable > 0n && (
+                <button className="hb-btn !from-green-600 !to-emerald-500" onClick={handleClaim}>
+                  🎁 Claim {fmtETH(claimable)} Vested HBURN
+                </button>
+              )}
+            </div>
+          ) : (
+            /* ── Active Burn Form ──────────────────────────── */
+            <>
+              {/* Week Indicator */}
+              <div className="flex gap-1.5 mb-5">
+                {WEEKS.map((w) => (
+                  <div key={w.week} className={`flex-1 py-3 px-2 rounded-xl text-center text-xs border transition-all relative ${
+                    w.week === week ? "bg-fire-1/10 border-fire-2 text-fire-3 shadow-[0_0_20px_rgba(255,69,0,0.1)]" : "bg-dark-3 border-dark-5 text-txt-2"
+                  }`}>
+                    <span className="font-bold text-sm block">W{w.week}</span>
+                    <span className="opacity-70">{w.label}</span>
+                    {w.bonus > 100 && (
+                      <span className="absolute -top-2 -right-1 bg-fire-1 text-white text-[9px] px-1.5 py-0.5 rounded font-bold">
+                        {w.bonusLabel}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
 
-          {/* Input */}
-          <div className="relative mb-3">
-            <input type="number" className="hb-input" placeholder="0" value={input}
-              onChange={(e) => setInput(e.target.value)} disabled={!account || !genesisActive} />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 bg-dark-4 px-3 py-1.5 rounded-lg text-xs text-txt-2 font-semibold tracking-wider">
-              TITANX
-            </span>
-          </div>
-          {account && <p className="text-[11px] text-txt-3 mb-3">Balance: {fmt(balance)} TITANX</p>}
-          <div className="flex gap-1.5 mb-5">
-            {[25, 50, 75, 100].map((p) => (
-              <button key={p} className="hb-btn-ghost" onClick={() => setPct(p)} disabled={!account}>{p}%</button>
-            ))}
-          </div>
+              {/* Input */}
+              <div className="relative mb-3">
+                <input type="number" className="hb-input" placeholder="0" value={input}
+                  onChange={(e) => setInput(e.target.value)} disabled={!account} />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 bg-dark-4 px-3 py-1.5 rounded-lg text-xs text-txt-2 font-semibold tracking-wider">
+                  TITANX
+                </span>
+              </div>
+              {account && <p className="text-[11px] text-txt-3 mb-3">Balance: {fmt(balance)} TITANX</p>}
+              <div className="flex gap-1.5 mb-5">
+                {[25, 50, 75, 100].map((p) => (
+                  <button key={p} className="hb-btn-ghost" onClick={() => setPct(p)} disabled={!account}>{p}%</button>
+                ))}
+              </div>
 
-          {/* Output Preview */}
-          <div className="hb-output">
-            <div className="hb-output-row"><span className="text-xs text-txt-2">You Receive</span><span className="font-display font-bold text-fire-3">{amt > 0 ? fmt(hburnOut) + " HBURN" : "—"}</span></div>
-            <hr className="hb-divider" />
-            <div className="hb-output-row"><span className="text-xs text-txt-2">↳ Instant (25%)</span><span className="text-green-400 text-sm font-bold">{amt > 0 ? fmt(immediate) : "—"}</span></div>
-            <div className="hb-output-row"><span className="text-xs text-txt-2">↳ Vested (75%)</span><span className="text-txt-3 text-sm">{amt > 0 ? fmt(vested) : "—"}</span></div>
-            <hr className="hb-divider" />
-            <div className="hb-output-row"><span className="text-xs text-txt-2">Rate</span><span className="text-xs">{(weekData.ratio * weekData.bonus / 10000).toFixed(4)} HBURN/TITANX</span></div>
-          </div>
+              {/* Output Preview */}
+              <div className="hb-output">
+                <div className="hb-output-row"><span className="text-xs text-txt-2">You Receive</span><span className="font-display font-bold text-fire-3">{amt > 0 ? fmt(hburnOut) + " HBURN" : "—"}</span></div>
+                <hr className="hb-divider" />
+                <div className="hb-output-row"><span className="text-xs text-txt-2">↳ Instant (25%)</span><span className="text-green-400 text-sm font-bold">{amt > 0 ? fmt(immediate) : "—"}</span></div>
+                <div className="hb-output-row"><span className="text-xs text-txt-2">↳ Vested (75%)</span><span className="text-txt-3 text-sm">{amt > 0 ? fmt(vested) : "—"}</span></div>
+                <hr className="hb-divider" />
+                <div className="hb-output-row"><span className="text-xs text-txt-2">Rate</span><span className="text-xs">{(weekData.ratio * weekData.bonus / 10000).toFixed(4)} HBURN/TITANX</span></div>
+              </div>
 
-          <button className="hb-btn" onClick={handleBurn}
-            disabled={!account || !genesisActive || amt <= 0 || amt > balNum}>
-            {!account ? "Connect Wallet" : !genesisActive ? "Genesis Ended" : amt > balNum ? "Insufficient Balance" : amt <= 0 ? "Enter Amount" : `🔥 Burn ${fmt(amt)} TitanX`}
-          </button>
+              <button className="hb-btn" onClick={handleBurn}
+                disabled={!account || amt <= 0 || amt > balNum}>
+                {!account ? "Connect Wallet" : amt > balNum ? "Insufficient Balance" : amt <= 0 ? "Enter Amount" : `🔥 Burn ${fmt(amt)} TitanX`}
+              </button>
+            </>
+          )}
         </div>
 
         {/* Right Side */}

@@ -90,12 +90,12 @@ export default function Testnet() {
 
         setProtocolState({
           genesisEnded,
-          genesisDaysLeft: Math.max(0, Math.ceil((genesisEndTs - now) / 86400)),
+          genesisHoursLeft: Math.max(0, ((genesisEndTs - now) / 3600).toFixed(1)),
           genesisEndTs,
           currentEpoch: Number(currentEpoch),
           firstEpochTs,
           epochsStarted: now >= firstEpochTs,
-          epochsDaysUntil: Math.max(0, Math.ceil((firstEpochTs - now) / 86400)),
+          epochsHoursUntil: Math.max(0, ((firstEpochTs - now) / 3600).toFixed(1)),
           totalShares,
         });
       } catch (e) { console.error(e); }
@@ -182,13 +182,13 @@ export default function Testnet() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="hb-stat">
           <div className="num" style={{ color: protocolState?.genesisEnded ? "#22c55e" : "#ff4500" }}>
-            {protocolState?.genesisEnded ? "✅" : `${protocolState?.genesisDaysLeft ?? "—"}d`}
+            {protocolState?.genesisEnded ? "✅" : `${protocolState?.genesisHoursLeft ?? "—"}h`}
           </div>
           <div className="lbl">{protocolState?.genesisEnded ? "Genesis Done" : "Genesis Left"}</div>
         </div>
         <div className="hb-stat">
           <div className="num" style={{ color: protocolState?.epochsStarted ? "#22c55e" : "#f59e0b" }}>
-            {protocolState?.epochsStarted ? `#${protocolState?.currentEpoch}` : `${protocolState?.epochsDaysUntil ?? "—"}d`}
+            {protocolState?.epochsStarted ? `#${protocolState?.currentEpoch}` : `${protocolState?.epochsHoursUntil ?? "—"}h`}
           </div>
           <div className="lbl">{protocolState?.epochsStarted ? "Current Epoch" : "Until Epochs"}</div>
         </div>
@@ -329,21 +329,43 @@ export default function Testnet() {
             </>
           )}
 
+          {/* Beta Timings */}
+          <div className="mt-6 pt-4 border-t border-white/[0.06]">
+            <p className="text-[10px] text-txt-3 uppercase tracking-wider mb-3">⏱️ Beta Timings (vs Mainnet)</p>
+            <div className="space-y-1.5">
+              {[
+                { param: "Genesis Duration", mainnet: "28 days", beta: "12 hours" },
+                { param: "Genesis Weeks", mainnet: "7 days", beta: "3 hours" },
+                { param: "Vesting", mainnet: "28 days", beta: "6 hours" },
+                { param: "Epoch Duration", mainnet: "8 days", beta: "2 hours" },
+                { param: "Min Stake", mainnet: "28 days", beta: "1 hour" },
+                { param: "Max Stake", mainnet: "3,500 days", beta: "24 hours" },
+                { param: "Grace Period", mainnet: "7 days", beta: "1 hour" },
+              ].map((r) => (
+                <div key={r.param} className="flex items-center text-xs rounded-lg px-3 py-1.5" style={{ background: "rgba(255,255,255,0.02)" }}>
+                  <span className="text-txt-2 flex-1">{r.param}</span>
+                  <span className="text-txt-3 w-20 text-right line-through opacity-50">{r.mainnet}</span>
+                  <span className="text-fire-3 w-20 text-right font-bold">{r.beta}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Phase Guide */}
-          <div className="mt-6 pt-4 border-t border-dark-5">
+          <div className="mt-6 pt-4 border-t border-white/[0.06]">
             <p className="text-[10px] text-txt-3 uppercase tracking-wider mb-3">Testing Cheat Sheet</p>
             <div className="space-y-2 text-xs text-txt-2">
               <div className="flex gap-2">
                 <span className="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold bg-fire-1/20 text-fire-3 border border-fire-2/40 flex-shrink-0">1</span>
-                <span><strong className="text-txt-1">Genesis:</strong> Mint TitanX → Burn in Genesis → Claim vested HBURN over 7 days</span>
+                <span><strong className="text-txt-1">Genesis (12h):</strong> Mint TitanX → Burn in Genesis → Claim vested HBURN over 6h</span>
               </div>
               <div className="flex gap-2">
                 <span className="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold bg-fire-1/20 text-fire-3 border border-fire-2/40 flex-shrink-0">2</span>
-                <span><strong className="text-txt-1">Epochs:</strong> Warp past Genesis (28d) → Burn TitanX/DragonX → Finalize → Claim ETH</span>
+                <span><strong className="text-txt-1">Epochs (2h each):</strong> After Genesis ends → Burn TitanX/DragonX → Finalize → Claim ETH</span>
               </div>
               <div className="flex gap-2">
                 <span className="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold bg-fire-1/20 text-fire-3 border border-fire-2/40 flex-shrink-0">3</span>
-                <span><strong className="text-txt-1">Staking:</strong> Stake HBURN → Warp to maturity → Unstake → Check penalties</span>
+                <span><strong className="text-txt-1">Staking (min 1h):</strong> Stake HBURN → Wait maturity → Unstake → Check penalties</span>
               </div>
             </div>
           </div>

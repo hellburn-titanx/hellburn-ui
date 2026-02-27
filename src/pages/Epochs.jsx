@@ -1,16 +1,20 @@
 import { useState, useEffect, useCallback } from "react";
 import { useWallet } from "@/hooks/useWallet";
-import { useEpochs, useTitanX, useDragonX } from "@/hooks/useContracts";
+import { useEpochs, useTitanX, useDragonX, useGenesis } from "@/hooks/useContracts";
 import { ADDRESSES, EPOCH_DURATION_DAYS } from "@/config/constants";
 import { fmt, fmtETH, bn, toWei, timeLeft } from "@/utils";
 import TxModal from "@/components/TxModal";
+import { Link } from "react-router-dom";
 
 export default function Epochs() {
   const { account } = useWallet();
   const epochs = useEpochs();
   const titanX = useTitanX();
   const dragonX = useDragonX();
+  const genesis = useGenesis();
 
+  const [genesisActive, setGenesisActive] = useState(true);
+  const [genesisEnd, setGenesisEnd] = useState(0);
   const [token, setToken] = useState("titanX"); // "titanX" | "dragonX"
   const [input, setInput] = useState("");
   const [balTX, setBalTX] = useState(0n);
@@ -20,6 +24,21 @@ export default function Epochs() {
   const [streak, setStreak] = useState(10);
   const [pastEpochs, setPastEpochs] = useState([]);
   const [tx, setTx] = useState({ phase: null, msg: "", sub: "" });
+
+  // Check genesis state
+  useEffect(() => {
+    if (!genesis) return;
+    (async () => {
+      try {
+        const [ended, end] = await Promise.all([
+          genesis.genesisEnded(),
+          genesis.genesisEnd(),
+        ]);
+        setGenesisActive(!ended && Math.floor(Date.now() / 1000) <= Number(end));
+        setGenesisEnd(Number(end));
+      } catch { /* assume active */ }
+    })();
+  }, [genesis]);
 
   // Fetch data
   useEffect(() => {
@@ -124,6 +143,7 @@ export default function Epochs() {
     <div className="space-y-6">
       <div className="text-center mb-6">
         <h1 className="font-display font-black text-4xl tracking-tight">
+          <span className="inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold bg-fire-1/20 text-fire-3 border border-fire-2/40 mr-2 align-middle">2</span>
           Burn <span className="fire-text">Epochs</span>
         </h1>
         <p className="text-txt-2 text-sm mt-2">
@@ -131,6 +151,25 @@ export default function Epochs() {
         </p>
       </div>
 
+      {/* Genesis Lock Overlay */}
+      {genesisActive && (
+        <div className="hb-card border-fire-2/20 bg-gradient-to-br from-fire-1/5 to-dark-2 text-center py-12">
+          <div className="text-5xl mb-4">🔒</div>
+          <h2 className="font-display font-bold text-xl text-txt-1 mb-2">Epochs Unlock After Genesis</h2>
+          <p className="text-sm text-txt-2 mb-2">
+            The competitive burn epochs begin once the 28-day Genesis phase ends.
+          </p>
+          <p className="text-xs text-txt-3 mb-6">
+            Genesis ends in: <span className="font-bold text-fire-3">{genesisEnd ? timeLeft(genesisEnd) : "—"}</span>
+          </p>
+          <Link to="/genesis" className="hb-btn-outline inline-block">
+            Go to Genesis →
+          </Link>
+        </div>
+      )}
+
+      {/* Main content — only when genesis ended */}
+      {!genesisActive && (<>
       {/* Epoch Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="hb-stat"><div className="num">#{epochData?.epochId ?? "—"}</div><div className="lbl">Current Epoch</div></div>
@@ -235,6 +274,7 @@ export default function Epochs() {
           </div>
         </div>
       </div>
+      </>)}
 
       <TxModal phase={tx.phase} message={tx.msg} subtext={tx.sub} onClose={() => setTx({ phase: null })} />
     </div>

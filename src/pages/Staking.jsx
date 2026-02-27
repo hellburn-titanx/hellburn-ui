@@ -1,16 +1,20 @@
 import { useState, useEffect, useCallback } from "react";
 import { useWallet } from "@/hooks/useWallet";
-import { useStaking, useHBURN, useTitanX, useDragonX } from "@/hooks/useContracts";
+import { useStaking, useHBURN, useTitanX, useDragonX, useGenesis } from "@/hooks/useContracts";
 import { ADDRESSES, STAKE_TIERS, MIN_STAKE_DAYS, MAX_STAKE_DAYS, getTier } from "@/config/constants";
-import { fmt, fmtETH, bn, toWei } from "@/utils";
+import { fmt, fmtETH, bn, toWei, timeLeft } from "@/utils";
 import TxModal from "@/components/TxModal";
+import { Link } from "react-router-dom";
 
 export default function Staking() {
   const { account } = useWallet();
   const staking = useStaking();
   const hburn = useHBURN();
   const titanX = useTitanX();
+  const genesis = useGenesis();
 
+  const [genesisActive, setGenesisActive] = useState(true);
+  const [genesisEnd, setGenesisEnd] = useState(0);
   const [input, setInput] = useState("");
   const [days, setDays] = useState(369);
   const [hburnBal, setHburnBal] = useState(0n);
@@ -25,6 +29,21 @@ export default function Staking() {
   const tier = getTier(days);
   const amt = parseFloat(input) || 0;
   const balNum = bn(hburnBal);
+
+  // Check genesis state
+  useEffect(() => {
+    if (!genesis) return;
+    (async () => {
+      try {
+        const [ended, end] = await Promise.all([
+          genesis.genesisEnded(),
+          genesis.genesisEnd(),
+        ]);
+        setGenesisActive(!ended && Math.floor(Date.now() / 1000) <= Number(end));
+        setGenesisEnd(Number(end));
+      } catch { /* assume active */ }
+    })();
+  }, [genesis]);
 
   // Fetch data
   useEffect(() => {
@@ -142,12 +161,33 @@ export default function Staking() {
     <div className="space-y-6">
       <div className="text-center mb-6">
         <h1 className="font-display font-black text-4xl tracking-tight">
+          <span className="inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold bg-fire-1/20 text-fire-3 border border-fire-2/40 mr-2 align-middle">3</span>
           <span className="fire-text">Stake</span> HBURN
         </h1>
         <p className="text-txt-2 text-sm mt-2">
           Earn real ETH yield. Longer stakes = more shares. Fuel with TitanX for extra boost.
         </p>
       </div>
+
+      {/* Genesis Lock Overlay */}
+      {genesisActive && (
+        <div className="hb-card border-fire-2/20 bg-gradient-to-br from-fire-1/5 to-dark-2 text-center py-12">
+          <div className="text-5xl mb-4">🔒</div>
+          <h2 className="font-display font-bold text-xl text-txt-1 mb-2">Staking Unlocks After Genesis</h2>
+          <p className="text-sm text-txt-2 mb-2">
+            Stake your HBURN to earn a share of the 20% ETH from each Burn Epoch.
+          </p>
+          <p className="text-xs text-txt-3 mb-6">
+            Genesis ends in: <span className="font-bold text-fire-3">{genesisEnd ? timeLeft(genesisEnd) : "—"}</span>
+          </p>
+          <Link to="/genesis" className="hb-btn-outline inline-block">
+            Go to Genesis →
+          </Link>
+        </div>
+      )}
+
+      {/* Main content — only when genesis ended */}
+      {!genesisActive && (<>
 
       {/* Global Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -272,6 +312,7 @@ export default function Staking() {
           )}
         </div>
       </div>
+      </>)}
 
       {/* Fuel Modal */}
       {fuelStakeId !== null && (
