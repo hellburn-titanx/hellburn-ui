@@ -1,0 +1,114 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #0a0a12; }
+  ::-webkit-scrollbar-thumb { background: #24243a; border-radius: 3px; }
+  ::selection { background: rgba(255,69,0,0.3); color: #f0ece4; }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+  input[type="number"] { -moz-appearance: textfield; }
+}
+
+@layer components {
+  /* Card */
+  .hb-card {
+    @apply bg-dark-2 border border-dark-4 rounded-2xl p-6 relative overflow-hidden transition-colors;
+	opacity: 0.8
+  }
+  .hb-card:hover { @apply border-fire-2/20; }
+
+  /* Fire gradient text */
+  .fire-text {
+    @apply bg-gradient-to-r from-fire-1 via-fire-2 to-fire-3 bg-clip-text text-transparent;
+  }
+
+  /* Label */
+  .hb-label {
+    @apply text-[11px] uppercase tracking-[2px] text-txt-3 mb-4 flex items-center gap-2;
+	opacity: 0.8
+  }
+  .hb-label .dot {
+    @apply w-1.5 h-1.5 rounded-full bg-fire-2 animate-pulse_slow;
+  }
+
+  /* Input */
+  .hb-input {
+    @apply w-full py-4 px-4 pr-28 bg-dark-3 border border-dark-5 rounded-xl text-txt-1 font-display text-xl font-bold outline-none transition-colors;
+  }
+  .hb-input:focus { @apply border-fire-2; }
+  .hb-input::placeholder { @apply text-txt-3 font-light text-base; }
+
+  /* Primary button */
+  .hb-btn {
+    @apply w-full py-4 bg-gradient-to-r from-fire-1 to-fire-ember border-none rounded-xl text-white font-display font-bold text-base cursor-pointer transition-all uppercase tracking-wider relative overflow-hidden;
+  }
+  .hb-btn:hover:not(:disabled) { @apply -translate-y-0.5 shadow-[0_12px_40px_rgba(255,45,0,0.4)]; }
+  .hb-btn:disabled { @apply opacity-30 cursor-not-allowed; }
+
+  /* Secondary / outline button */
+  .hb-btn-outline {
+    @apply py-2.5 px-6 bg-transparent border border-fire-2 rounded-lg text-fire-3 font-mono font-semibold text-xs cursor-pointer transition-all uppercase tracking-wider;
+  }
+  .hb-btn-outline:hover { @apply bg-fire-1/10 shadow-[0_0_20px_rgba(255,69,0,0.15)]; }
+
+  /* Small ghost button */
+  .hb-btn-ghost {
+    @apply flex-1 py-2 bg-dark-3 border border-dark-5 rounded-lg text-txt-2 font-mono text-xs cursor-pointer transition-all text-center;
+  }
+  .hb-btn-ghost:hover { @apply border-fire-2 text-fire-3 bg-fire-1/5; }
+
+  /* Stat box */
+  .hb-stat {
+    @apply text-center py-4 px-2 bg-dark-3 rounded-xl border border-dark-5;
+	opacity: 0.8
+  }
+  .hb-stat .num {
+    @apply font-display font-bold text-xl text-fire-3;
+    text-shadow: 0 0 15px rgba(255,165,0,0.2);
+  }
+  .hb-stat .lbl { @apply text-[10px] text-txt-3 uppercase tracking-[1.5px] mt-1.5; }
+
+  /* Progress bar */
+  .hb-progress {
+    @apply h-1.5 bg-dark-4 rounded-full overflow-hidden;
+	opacity: 0.8
+  }
+  .hb-progress-fill {
+    @apply h-full bg-gradient-to-r from-fire-1 to-fire-3 rounded-full transition-all duration-500 relative;
+  }
+  .hb-progress-fill::after {
+    content: "";
+    @apply absolute right-0 -top-0.5 w-2.5 h-2.5 rounded-full bg-fire-3;
+    box-shadow: 0 0 12px #ffa500;
+  }
+
+  /* Nav link */
+  .hb-nav-link {
+    @apply px-4 py-2 text-sm text-txt-2 rounded-lg transition-all;
+  }
+  .hb-nav-link:hover { @apply text-txt-1 bg-dark-3; }
+  .hb-nav-link.active { @apply text-fire-3 bg-fire-1/10; }
+
+  /* Output / calculation box */
+  .hb-output {
+    @apply bg-dark-3 rounded-xl p-5 mb-5;
+  }
+  .hb-output-row {
+    @apply flex justify-between items-center py-1.5;
+  }
+  .hb-divider { @apply border-none border-t border-dark-5 my-2; }
+
+  /* Table */
+  .hb-table {
+    @apply w-full text-sm;
+  }
+  .hb-table th {
+    @apply text-left text-[10px] uppercase tracking-[1.5px] text-txt-3 pb-3 font-normal;
+  }
+  .hb-table td {
+    @apply py-3 border-t border-dark-5;
+  }
+}
