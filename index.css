@@ -17,8 +17,7 @@
   .hb-card {
     @apply border border-white/[0.06] rounded-2xl p-6 relative overflow-hidden transition-all;
     background: rgba(10, 10, 18, 0.55);
-	transparent: 80%
-    /*backdrop-filter: blur(16px);*/
+    backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
   }
   .hb-card:hover {
@@ -34,7 +33,6 @@
   /* Label */
   .hb-label {
     @apply text-[11px] uppercase tracking-[2px] text-txt-3 mb-4 flex items-center gap-2;
-	transparent: 80%
   }
   .hb-label .dot {
     @apply w-1.5 h-1.5 rounded-full bg-fire-2 animate-pulse_slow;
