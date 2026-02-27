@@ -56,9 +56,11 @@ export function calcGenesisOutput(titanXAmount, weekNum) {
   return (titanXAmount * ratios[w] * bonuses[w]) / 10000;
 }
 
+
 export function getWhitepaperUrl() {
-  const lang = (navigator.language || "en").toLowerCase();
-  return lang.startsWith("de") ? "/public/HellBurn_Whitepaper_v2.0_DE.pdf" : "/HellBurn_Whitepaper_v2.0_EN.pdf";
+  const lang = (navigator.language || navigator.userLanguage || "en").toLowerCase();
+  const isGerman = lang.startsWith("de");
+  return isGerman ? "/public/HellBurn_Whitepaper_v2.0_DE.pdf" : "/HellBurn_Whitepaper_v2.0_EN.pdf";
 }
 
 // Sleep helper for TX animations

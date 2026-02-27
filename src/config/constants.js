@@ -1,13 +1,13 @@
 // ─── Deployed Addresses (Sepolia) ─────────────────────────────────
 // Update these after mainnet deployment
 export const ADDRESSES = {
-  hellBurnToken: "0x70bb7d4FF24f7F414d75B0eb3019573D18bA8B1F",
-  genesisBurn: "0x8001dc8D7B81d749206846a6026A267678C7e67d",
-  burnEpochs: "0xf7E3Ca8C41285554A1Fb065d3abcB95531FC0009",
-  hellBurnStaking: "0x5c771cfDf63554d6f87608F9c8e4DB21F294bE21",
-  buyAndBurn: "0x255752f0755A8b260062AfFfe4ef34aB3Da4f4d5",
-  titanX: "0x27A9D72381Adcd213628fDd95Af4d700D8CAf222",
-  dragonX: "0xf000B0b9b2Ab77CcBa30A162894C896da26c6E2C",
+  hellBurnToken: "0x5a1A7f60B872f0A6F9Bc9935484aE9e813899860",
+  genesisBurn: "0x57a2e10C64936FBCCdF1A6522A67B9a6C6bcc644",
+  burnEpochs: "0x3b2956EAb2EB94409Ed47922c3057Cab576F8828",
+  hellBurnStaking: "0xD748e6A93A182f424948d9a0F29785798334dFD0",
+  buyAndBurn: "0x691544332a66e1d53ae6904b3F7B3E6259AADb30",
+  titanX: "0xd2F698c37C1447a0312459A09296577958864196",
+  dragonX: "0xc6bC262DF37FaE51a1d2Dd61c402Dc52A8CC9AC3",
 };
 
 // ─── Chain ────────────────────────────────────────────────────────
@@ -17,6 +17,7 @@ export const RPC_URL = "https://eth-sepolia.g.alchemy.com/v2/demo";
 
 // ─── Tokenomics Constants ─────────────────────────────────────────
 export const GENESIS_DURATION_DAYS = 28;
+export const GENESIS_DURATION_HOURS = 12; // Beta: 12h instead of 28 days
 export const EPOCH_DURATION_DAYS = 8;
 export const MAX_STAKE_DAYS = 3500;
 export const MIN_STAKE_DAYS = 28;

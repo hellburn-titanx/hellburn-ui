@@ -22,7 +22,8 @@ const CONTRACT_LINKS = [
 
 const SOCIAL_ITEMS = [
   /*{ label: "𝕏 Twitter", href: LINKS.twitter, icon: "𝕏" },
-  { label: "Telegram", href: LINKS.telegram, icon: "✈" },*/
+  { label: "Telegram", href: LINKS.telegram, icon: "✈" },
+  { label: "Discord", href: LINKS.discord, icon: "💬" },*/
 ];
 
 export default function Layout() {
@@ -36,13 +37,18 @@ export default function Layout() {
     if (!genesis) return;
     (async () => {
       try {
-        const ended = await genesis.genesisEnded();
-        setGenesisActive(!ended);
+        const [ended, genesisEnd] = await Promise.all([
+          genesis.genesisEnded(),
+          genesis.genesisEnd(),
+        ]);
+        const now = Math.floor(Date.now() / 1000);
+        // Genesis is inactive if ended flag set OR time has passed
+        setGenesisActive(!ended && now <= Number(genesisEnd));
       } catch { /* fallback: assume active */ }
     })();
   }, [genesis]);
 
-  const activePhase = genesisActive ? 1 : 2; // 1=genesis, 2+=epochs&staking
+  const activePhase = genesisActive ? 1 : 3; // 1=genesis active, 3=all unlocked
 
   return (
     <div className="min-h-screen relative flex flex-col" style={{
@@ -85,7 +91,7 @@ export default function Layout() {
               Dashboard
             </NavLink>
             {PHASES.map(({ to, label, step }) => {
-              const isLocked = step > 1 && genesisActive;
+              const isLocked = step === 1 ? !genesisActive : genesisActive;
               return (
                 <NavLink key={to} to={to}
                   className={({ isActive }) =>
@@ -145,7 +151,7 @@ export default function Layout() {
             Dashboard
           </NavLink>
           {PHASES.map(({ to, label, step }) => {
-            const isLocked = step > 1 && genesisActive;
+            const isLocked = step === 1 ? !genesisActive : genesisActive;
             return (
               <NavLink key={to} to={to}
                 className={({ isActive }) =>
@@ -215,7 +221,6 @@ export default function Layout() {
                   className="block text-xs text-txt-2 hover:text-fire-3 transition-colors">
                   📄 Whitepaper
                 </a>
-                
               </div>
             </div>
 
