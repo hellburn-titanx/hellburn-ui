@@ -60,7 +60,7 @@ export function calcGenesisOutput(titanXAmount, weekNum) {
 export function getWhitepaperUrl() {
   const lang = (navigator.language || navigator.userLanguage || "en").toLowerCase();
   const isGerman = lang.startsWith("de");
-  return isGerman ? "/public/HellBurn_Whitepaper_v2.0_DE.pdf" : "/HellBurn_Whitepaper_v2.0_EN.pdf";
+  return isGerman ? "/HellBurn_Whitepaper_v2.0_DE.pdf" : "/HellBurn_Whitepaper_v2.0_EN.pdf";
 }
 
 // Sleep helper for TX animations
