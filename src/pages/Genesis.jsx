@@ -105,7 +105,7 @@ export default function Genesis() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="hb-stat"><div className="num">{stats ? fmt(stats.burned) : "—"}</div><div className="lbl">TitanX Burned</div></div>
         <div className="hb-stat"><div className="num">{stats ? fmt(stats.minted) : "—"}</div><div className="lbl">HBURN Minted</div></div>
-        <div className="hb-stat"><div className="num" style={{ color: "#22c55e" }}>{daysLeft}d</div><div className="lbl">Days Left</div></div>
+        <div className="hb-stat"><div className="num" style={{ color: "#22c55e" }}>{hoursLeft}h</div><div className="lbl">Hours Left</div></div>
         <div className="hb-stat"><div className="num">W{week}</div><div className="lbl">Current Week</div></div>
       </div>
 
