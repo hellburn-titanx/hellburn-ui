@@ -24,6 +24,13 @@ export default function Epochs() {
   const [streak, setStreak] = useState(10);
   const [pastEpochs, setPastEpochs] = useState([]);
   const [tx, setTx] = useState({ phase: null, msg: "", sub: "" });
+  const [tick, setTick] = useState(0);
+
+  // Live countdown
+  useEffect(() => {
+    const iv = setInterval(() => setTick((t) => t + 1), 1000);
+    return () => clearInterval(iv);
+  }, []);
 
   // Check genesis state
   useEffect(() => {
@@ -66,12 +73,19 @@ export default function Epochs() {
 
         setEpochData({ epochId: eid, epochEnd, epochDeposited, totalBurns, titanBurned, dragonBurned, ethDist, firstStart });
 
-        // Load past epochs with unclaimed rewards
+        // Load past epochs with user participation
         const past = [];
         for (let i = Math.max(0, eid - 10); i < eid; i++) {
-          const pending = await epochs.pendingReward(i, account);
-          if (pending > 0n) {
-            past.push({ id: i, reward: pending });
+          const [myBurnPast, epochInfo] = await Promise.all([
+            epochs.getUserEpochBurn(i, account),
+            epochs.epochs(i),
+          ]);
+          const finalized = epochInfo.finalized;
+          const pending = finalized ? await epochs.pendingReward(i, account) : 0n;
+          const hasBurns = myBurnPast > 0n;
+          // Show if: user burned (needs finalize or claim) OR not finalized (anyone can finalize)
+          if (hasBurns || !finalized) {
+            past.push({ id: i, reward: pending, finalized, hasBurns, ethDeposited: epochInfo.ethDeposited });
           }
         }
         setPastEpochs(past);
@@ -122,12 +136,25 @@ export default function Epochs() {
     }
   }, [epochs]);
 
+  // Finalize epoch
+  const handleFinalize = useCallback(async (epochId) => {
+    try {
+      setTx({ phase: "pending", msg: `Finalizing Epoch #${epochId}...`, sub: "Distributes ETH rewards" });
+      const finTx = await epochs.finalizeEpoch(epochId);
+      await finTx.wait();
+      setTx({ phase: "success", msg: `Epoch #${epochId} Finalized!`, sub: "Rewards are now claimable" });
+    } catch (err) {
+      setTx({ phase: "error", msg: err.reason || "Finalize failed" });
+    }
+  }, [epochs]);
+
   // Batch claim
   const handleBatchClaim = useCallback(async () => {
-    if (pastEpochs.length === 0) return;
+    const claimable = pastEpochs.filter((e) => e.finalized && e.reward > 0n);
+    if (claimable.length === 0) return;
     try {
       setTx({ phase: "pending", msg: "Claiming all rewards...", sub: "Confirm in wallet" });
-      const ids = pastEpochs.map((e) => e.id);
+      const ids = claimable.map((e) => e.id);
       const claimTx = await epochs.batchClaimRewards(ids);
       await claimTx.wait();
       setTx({ phase: "success", msg: "All Rewards Claimed!", sub: "" });
@@ -229,32 +256,51 @@ export default function Epochs() {
           </button>
         </div>
 
-        {/* Unclaimed Rewards */}
+        {/* Past Epochs & Rewards */}
         <div className="hb-card">
-          <div className="hb-label"><span className="dot" /> Unclaimed ETH Rewards</div>
+          <div className="hb-label"><span className="dot" /> Past Epochs & Rewards</div>
           {!account ? (
             <p className="text-center text-txt-3 py-8 text-sm">Connect wallet to view rewards</p>
           ) : pastEpochs.length === 0 ? (
-            <p className="text-center text-txt-3 py-8 text-sm">No unclaimed rewards</p>
+            <p className="text-center text-txt-3 py-8 text-sm">No past epochs with activity</p>
           ) : (
             <>
-              <table className="hb-table">
-                <thead><tr><th>Epoch</th><th className="text-right">ETH Reward</th><th className="text-right">Action</th></tr></thead>
-                <tbody>
-                  {pastEpochs.map((e) => (
-                    <tr key={e.id}>
-                      <td className="font-bold">#{e.id}</td>
-                      <td className="text-right text-green-400 font-bold">{fmtETH(e.reward)}</td>
-                      <td className="text-right">
-                        <button className="hb-btn-outline text-[10px] py-1 px-3" onClick={() => handleClaim(e.id)}>Claim</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <button className="hb-btn mt-4" onClick={handleBatchClaim}>
-                Claim All ({pastEpochs.length} epochs)
-              </button>
+              <div className="space-y-2 mb-4">
+                {pastEpochs.map((e) => (
+                  <div key={e.id} className="flex items-center justify-between bg-dark-3 rounded-lg px-4 py-3 border border-dark-5">
+                    <div className="flex items-center gap-3">
+                      <span className="font-display font-bold text-sm">#{e.id}</span>
+                      {!e.finalized ? (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                          Needs Finalization
+                        </span>
+                      ) : e.reward > 0n ? (
+                        <span className="text-green-400 font-bold text-sm">{fmtETH(e.reward)}</span>
+                      ) : (
+                        <span className="text-[10px] text-txt-3">
+                          {e.hasBurns ? "Claimed" : "No burns"}
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      {!e.finalized ? (
+                        <button className="hb-btn text-[10px] py-1.5 px-4" onClick={() => handleFinalize(e.id)}>
+                          ⚡ Finalize
+                        </button>
+                      ) : e.reward > 0n ? (
+                        <button className="hb-btn-outline text-[10px] py-1.5 px-4" onClick={() => handleClaim(e.id)}>
+                          Claim ETH
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {pastEpochs.some((e) => e.finalized && e.reward > 0n) && (
+                <button className="hb-btn w-full" onClick={handleBatchClaim}>
+                  Claim All ({pastEpochs.filter((e) => e.finalized && e.reward > 0n).length} epochs)
+                </button>
+              )}
             </>
           )}
 
