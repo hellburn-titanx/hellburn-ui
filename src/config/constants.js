@@ -19,8 +19,8 @@ export const RPC_URL = "https://eth-sepolia.g.alchemy.com/v2/demo";
 export const GENESIS_DURATION_DAYS = 28;
 export const GENESIS_DURATION_HOURS = 12; // Beta: 12h instead of 28 days
 export const EPOCH_DURATION_DAYS = 8;
-export const MAX_STAKE_DAYS = 3500;
-export const MIN_STAKE_DAYS = 28;
+export const MAX_STAKE_DAYS = 24;    // Beta: 24 days (mainnet: 3500)
+export const MIN_STAKE_DAYS = 1;      // Beta: 1 day (mainnet: 28)
 
 export const WEEKS = [
   { week: 1, ratio: 100, bonus: 115, label: "1:1", bonusLabel: "+15%" },
@@ -37,11 +37,11 @@ export const TITANX_DISTRIBUTION = [
 ];
 
 export const STAKE_TIERS = [
-  { name: "Bronze", minDays: 28, color: "#cd7f32" },
-  { name: "Silver", minDays: 90, color: "#c0c0c0" },
-  { name: "Gold", minDays: 369, color: "#ffd700" },
-  { name: "Platinum", minDays: 888, color: "#e5e4e2" },
-  { name: "Diamond", minDays: 3500, color: "#b9f2ff" },
+  { name: "Bronze", minDays: 1, color: "#cd7f32" },     // Beta (mainnet: 28)
+  { name: "Silver", minDays: 4, color: "#c0c0c0" },     // Beta (mainnet: 90)
+  { name: "Gold", minDays: 8, color: "#ffd700" },        // Beta (mainnet: 369)
+  { name: "Platinum", minDays: 16, color: "#e5e4e2" },   // Beta (mainnet: 888)
+  { name: "Diamond", minDays: 24, color: "#b9f2ff" },    // Beta (mainnet: 3500)
 ];
 
 export const getTier = (days) => {
