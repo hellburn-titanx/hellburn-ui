@@ -109,6 +109,12 @@ export default function Layout() {
                 </NavLink>
               );
             })}
+            <NavLink to="/portfolio"
+              className={({ isActive }) =>
+                `hb-nav-link flex items-center gap-2 ${isActive ? "active" : ""}`
+              }>
+              📊 Portfolio
+            </NavLink>
             {isTestnet && (
               <NavLink to="/testnet"
                 className={({ isActive }) =>
@@ -169,6 +175,12 @@ export default function Layout() {
               </NavLink>
             );
           })}
+          <NavLink to="/portfolio"
+            className={({ isActive }) =>
+              `hb-nav-link whitespace-nowrap text-xs flex items-center gap-1.5 ${isActive ? "active" : ""}`
+            }>
+            📊 Portfolio
+          </NavLink>
           {isTestnet && (
             <NavLink to="/testnet"
               className={({ isActive }) =>
@@ -221,6 +233,7 @@ export default function Layout() {
                   className="block text-xs text-txt-2 hover:text-fire-3 transition-colors">
                   📄 Whitepaper
                 </a>
+               
               </div>
             </div>
 

@@ -21,6 +21,7 @@ export const GENESIS_DURATION_HOURS = 12; // Beta: 12h instead of 28 days
 export const EPOCH_DURATION_DAYS = 8;
 export const MAX_STAKE_DAYS = 24;    // Beta: 24 days (mainnet: 3500)
 export const MIN_STAKE_DAYS = 1;      // Beta: 1 day (mainnet: 28)
+export const STAKE_UNIT_SECONDS = 3600; // Beta: 1 "day" = 1 hour (mainnet: 86400)
 
 export const WEEKS = [
   { week: 1, ratio: 100, bonus: 115, label: "1:1", bonusLabel: "+15%" },
