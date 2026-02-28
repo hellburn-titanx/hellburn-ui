@@ -21,9 +21,9 @@ const CONTRACT_LINKS = [
 ];
 
 const SOCIAL_ITEMS = [
-  { label: "𝕏 Twitter", href: LINKS.twitter, icon: "𝕏" },
+  /*{ label: "𝕏 Twitter", href: LINKS.twitter, icon: "𝕏" },
   { label: "Telegram", href: LINKS.telegram, icon: "✈" },
-  { label: "Discord", href: LINKS.discord, icon: "💬" },
+  { label: "Discord", href: LINKS.discord, icon: "💬" },*/
 ];
 
 export default function Layout() {
@@ -201,9 +201,7 @@ export default function Layout() {
             <div>
               <div className="font-display font-black text-xl fire-text tracking-tight mb-3">HELLBURN</div>
               <p className="text-xs text-txt-3 leading-relaxed mb-4">
-                Competitive Burn-to-Earn protocol built on the TitanX ecosystem.
-                Perpetual deflation. Real ETH yield.
-              </p>
+                Competitive Burn-to-Earn protocol</p>
               <div className="flex gap-2">
                 {SOCIAL_ITEMS.map((s) => (
                   <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer"
@@ -222,14 +220,6 @@ export default function Layout() {
                 <a href={getWhitepaperUrl()} target="_blank" rel="noopener noreferrer"
                   className="block text-xs text-txt-2 hover:text-fire-3 transition-colors">
                   📄 Whitepaper
-                </a>
-                <a href={LINKS.gitbook} target="_blank" rel="noopener noreferrer"
-                  className="block text-xs text-txt-2 hover:text-fire-3 transition-colors">
-                  📚 Documentation
-                </a>
-                <a href={LINKS.dexscreener} target="_blank" rel="noopener noreferrer"
-                  className="block text-xs text-txt-2 hover:text-fire-3 transition-colors">
-                  📊 DEXScreener
                 </a>
               </div>
             </div>
