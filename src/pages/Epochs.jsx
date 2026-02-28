@@ -13,7 +13,7 @@ export default function Epochs() {
   const dragonX = useDragonX();
   const genesis = useGenesis();
 
-  const [genesisActive, setGenesisActive] = useState(true);
+  const [genesisActive, setGenesisActive] = useState(false);
   const [genesisEnd, setGenesisEnd] = useState(0);
   const [token, setToken] = useState("titanX"); // "titanX" | "dragonX"
   const [input, setInput] = useState("");
