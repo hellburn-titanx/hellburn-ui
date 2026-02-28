@@ -16,7 +16,7 @@ export default function Staking() {
   const [genesisActive, setGenesisActive] = useState(false);
   const [genesisEnd, setGenesisEnd] = useState(0);
   const [input, setInput] = useState("");
-  const [days, setDays] = useState(369);
+  const [days, setDays] = useState(8);
   const [hburnBal, setHburnBal] = useState(0n);
   const [stakes, setStakes] = useState([]);
   const [globalStats, setGlobalStats] = useState(null);
@@ -242,7 +242,7 @@ export default function Staking() {
 
           {/* Preview */}
           <div className="hb-output">
-            <div className="hb-output-row"><span className="text-xs text-txt-2">Time Bonus</span><span className="font-bold">{(1 + ((days - 28) * 2.5) / (3500 - 28)).toFixed(2)}x</span></div>
+            <div className="hb-output-row"><span className="text-xs text-txt-2">Time Bonus</span><span className="font-bold">{(1 + ((days - MIN_STAKE_DAYS) * 2.5) / (MAX_STAKE_DAYS - MIN_STAKE_DAYS)).toFixed(2)}x</span></div>
             <div className="hb-output-row"><span className="text-xs text-txt-2">Tier</span><span className="font-bold" style={{ color: tier.color }}>◆ {tier.name}</span></div>
             <div className="hb-output-row"><span className="text-xs text-txt-2">Early Exit Penalty</span><span className="text-xs text-txt-3">Locked until 50% maturity</span></div>
           </div>
