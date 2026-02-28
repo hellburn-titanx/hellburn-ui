@@ -13,7 +13,7 @@ export default function Staking() {
   const titanX = useTitanX();
   const genesis = useGenesis();
 
-  const [genesisActive, setGenesisActive] = useState(true);
+  const [genesisActive, setGenesisActive] = useState(false);
   const [genesisEnd, setGenesisEnd] = useState(0);
   const [input, setInput] = useState("");
   const [days, setDays] = useState(369);
