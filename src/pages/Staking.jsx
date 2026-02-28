@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useWallet } from "@/hooks/useWallet";
 import { useStaking, useHBURN, useTitanX, useDragonX, useGenesis } from "@/hooks/useContracts";
-import { ADDRESSES, STAKE_TIERS, MIN_STAKE_DAYS, MAX_STAKE_DAYS, getTier } from "@/config/constants";
+import { ADDRESSES, STAKE_TIERS, MIN_STAKE_DAYS, MAX_STAKE_DAYS, STAKE_UNIT_SECONDS, getTier } from "@/config/constants";
 import { fmt, fmtETH, bn, toWei, timeLeft } from "@/utils";
 import TxModal from "@/components/TxModal";
 import { Link } from "react-router-dom";
@@ -277,16 +277,17 @@ export default function Staking() {
           ) : (
             <div className="space-y-3">
               {activeStakes.map((s) => {
-                const daysTotal = Math.ceil((s.endTime - s.startTime) / 86400);
-                const t = getTier(daysTotal);
+                const numDays = Math.round((s.endTime - s.startTime) / STAKE_UNIT_SECONDS);
+                const t = getTier(numDays);
                 const penaltyPct = s.maturityPct < 50 ? "Locked" : s.maturityPct >= 100 ? "0%" : `${((100 - s.maturityPct) * 2)}%`;
                 const now = Math.floor(Date.now() / 1000);
                 const secsLeft = Math.max(0, s.endTime - now);
-                const daysLeft = Math.floor(secsLeft / 86400);
-                const hoursLeft = Math.floor((secsLeft % 86400) / 3600);
+                const hrsLeft = Math.floor(secsLeft / 3600);
                 const minsLeft = Math.floor((secsLeft % 3600) / 60);
+                const secsDisp = Math.floor(secsLeft % 60);
                 const ended = secsLeft === 0;
-                const endDate = new Date(s.endTime * 1000).toLocaleDateString();
+                const endDateTime = new Date(s.endTime * 1000);
+                const endStr = endDateTime.toLocaleString();
 
                 return (
                   <div key={s.id} className="bg-dark-3 rounded-xl p-4 border border-dark-5">
@@ -294,7 +295,7 @@ export default function Staking() {
                       <div>
                         <span className="text-xs font-bold" style={{ color: t.color }}>◆ {t.name}</span>
                         <span className="text-xs text-txt-3 ml-2">#{s.id}</span>
-                        <span className="text-xs text-txt-3 ml-2">· {daysTotal}d</span>
+                        <span className="text-xs text-txt-3 ml-2">· {numDays}d</span>
                       </div>
                       <span className="text-xs text-green-400 font-bold">{fmtETH(s.pendingETH)}</span>
                     </div>
@@ -304,12 +305,12 @@ export default function Staking() {
                       <div className="flex justify-between items-center text-[11px]">
                         <span className="text-txt-3">⏱ Remaining</span>
                         <span className={`font-bold ${ended ? "text-green-400" : "text-fire-3"}`}>
-                          {ended ? "✅ Mature" : daysLeft > 0 ? `${daysLeft}d ${hoursLeft}h ${minsLeft}m` : `${hoursLeft}h ${minsLeft}m`}
+                          {ended ? "✅ Mature" : hrsLeft > 0 ? `${hrsLeft}h ${minsLeft}m ${secsDisp}s` : `${minsLeft}m ${secsDisp}s`}
                         </span>
                       </div>
                       <div className="flex justify-between items-center text-[10px] mt-0.5">
                         <span className="text-txt-3">Ends</span>
-                        <span className="text-txt-2">{endDate}</span>
+                        <span className="text-txt-2">{endStr}</span>
                       </div>
                     </div>
 
