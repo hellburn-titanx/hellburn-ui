@@ -25,6 +25,13 @@ export default function Staking() {
   const [tx, setTx] = useState({ phase: null, msg: "", sub: "" });
   const [fuelStakeId, setFuelStakeId] = useState(null);
   const [fuelAmount, setFuelAmount] = useState("");
+  const [tick, setTick] = useState(0);
+
+  // Live countdown
+  useEffect(() => {
+    const iv = setInterval(() => setTick((t) => t + 1), 1000);
+    return () => clearInterval(iv);
+  }, []);
 
   const tier = getTier(days);
   const amt = parseFloat(input) || 0;
@@ -273,6 +280,13 @@ export default function Staking() {
                 const daysTotal = Math.ceil((s.endTime - s.startTime) / 86400);
                 const t = getTier(daysTotal);
                 const penaltyPct = s.maturityPct < 50 ? "Locked" : s.maturityPct >= 100 ? "0%" : `${((100 - s.maturityPct) * 2)}%`;
+                const now = Math.floor(Date.now() / 1000);
+                const secsLeft = Math.max(0, s.endTime - now);
+                const daysLeft = Math.floor(secsLeft / 86400);
+                const hoursLeft = Math.floor((secsLeft % 86400) / 3600);
+                const minsLeft = Math.floor((secsLeft % 3600) / 60);
+                const ended = secsLeft === 0;
+                const endDate = new Date(s.endTime * 1000).toLocaleDateString();
 
                 return (
                   <div key={s.id} className="bg-dark-3 rounded-xl p-4 border border-dark-5">
@@ -280,8 +294,23 @@ export default function Staking() {
                       <div>
                         <span className="text-xs font-bold" style={{ color: t.color }}>◆ {t.name}</span>
                         <span className="text-xs text-txt-3 ml-2">#{s.id}</span>
+                        <span className="text-xs text-txt-3 ml-2">· {daysTotal}d</span>
                       </div>
                       <span className="text-xs text-green-400 font-bold">{fmtETH(s.pendingETH)}</span>
+                    </div>
+
+                    {/* Time remaining bar */}
+                    <div className="mb-3 px-3 py-2 rounded-lg" style={{ background: "rgba(255,107,53,0.06)", border: "1px solid rgba(255,107,53,0.12)" }}>
+                      <div className="flex justify-between items-center text-[11px]">
+                        <span className="text-txt-3">⏱ Remaining</span>
+                        <span className={`font-bold ${ended ? "text-green-400" : "text-fire-3"}`}>
+                          {ended ? "✅ Mature" : daysLeft > 0 ? `${daysLeft}d ${hoursLeft}h ${minsLeft}m` : `${hoursLeft}h ${minsLeft}m`}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center text-[10px] mt-0.5">
+                        <span className="text-txt-3">Ends</span>
+                        <span className="text-txt-2">{endDate}</span>
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-3 gap-2 text-[11px] mb-3">
