@@ -136,17 +136,20 @@ export default function Epochs() {
     }
   }, [epochs]);
 
-  // Finalize epoch
-  const handleFinalize = useCallback(async (epochId) => {
+  // Finalize all pending epochs in one tx via finalizeUpTo (contract handles sequential order)
+  const handleFinalizeAll = useCallback(async () => {
+    const unfinalized = pastEpochs.filter((e) => !e.finalized).sort((a, b) => a.id - b.id);
+    if (unfinalized.length === 0) return;
+    const lastId = unfinalized[unfinalized.length - 1].id;
     try {
-      setTx({ phase: "pending", msg: `Finalizing Epoch #${epochId}...`, sub: "Distributes ETH rewards" });
-      const finTx = await epochs.finalizeEpoch(epochId);
+      setTx({ phase: "pending", msg: `Finalizing ${unfinalized.length} epoch${unfinalized.length > 1 ? "s" : ""}...`, sub: "Single transaction — confirm in wallet" });
+      const finTx = await epochs.finalizeUpTo(lastId);
       await finTx.wait();
-      setTx({ phase: "success", msg: `Epoch #${epochId} Finalized!`, sub: "Rewards are now claimable" });
+      setTx({ phase: "success", msg: `${unfinalized.length} Epoch${unfinalized.length > 1 ? "s" : ""} Finalized!`, sub: "Rewards are now claimable" });
     } catch (err) {
       setTx({ phase: "error", msg: err.reason || "Finalize failed" });
     }
-  }, [epochs]);
+  }, [epochs, pastEpochs]);
 
   // Batch claim
   const handleBatchClaim = useCallback(async () => {
@@ -178,20 +181,45 @@ export default function Epochs() {
         </p>
       </div>
 
-      {/* Genesis Lock Overlay */}
+      {/* Genesis Lock Overlay with How It Works */}
       {genesisActive && (
-        <div className="hb-card border-fire-2/20 bg-gradient-to-br from-fire-1/5 to-dark-2 text-center py-12">
-          <div className="text-5xl mb-4">🔒</div>
-          <h2 className="font-display font-bold text-xl text-txt-1 mb-2">Epochs Unlock After Genesis</h2>
-          <p className="text-sm text-txt-2 mb-2">
-            The competitive burn epochs begin once the 28-day Genesis phase ends.
-          </p>
-          <p className="text-xs text-txt-3 mb-6">
-            Genesis ends in: <span className="font-bold text-fire-3">{genesisEnd ? timeLeft(genesisEnd) : "—"}</span>
-          </p>
-          <Link to="/genesis" className="hb-btn-outline inline-block">
-            Go to Genesis →
-          </Link>
+        <div className="hb-card border-fire-2/20 bg-gradient-to-br from-fire-1/5 to-dark-2 py-10">
+          <div className="text-center mb-8">
+            <div className="text-5xl mb-4">🔒</div>
+            <h2 className="font-display font-bold text-xl text-txt-1 mb-2">Epochs Unlock After Genesis</h2>
+            <p className="text-xs text-txt-3 mb-4">
+              Genesis ends in: <span className="font-bold text-fire-3">{genesisEnd ? timeLeft(genesisEnd) : "—"}</span>
+            </p>
+            <Link to="/genesis" className="hb-btn-outline inline-block">
+              Go to Genesis →
+            </Link>
+          </div>
+
+          <div className="border-t border-dark-5 pt-6 mx-4 sm:mx-8">
+            <h3 className="text-sm font-bold text-txt-1 mb-4 text-center">How Burn Epochs Work</h3>
+            <div className="grid sm:grid-cols-2 gap-4 text-[12px]">
+              <div className="bg-dark-3/60 rounded-lg p-4 border border-dark-5">
+                <div className="text-lg mb-2">🔥</div>
+                <p className="font-bold text-txt-1 mb-1">Burn to Compete</p>
+                <p className="text-txt-3 leading-relaxed">Each epoch lasts {EPOCH_DURATION_DAYS} days. Burn TitanX (1x weight) or DragonX (2x weight) to compete for the ETH pool. The more you burn, the bigger your share.</p>
+              </div>
+              <div className="bg-dark-3/60 rounded-lg p-4 border border-dark-5">
+                <div className="text-lg mb-2">💰</div>
+                <p className="font-bold text-txt-1 mb-1">Earn Real ETH</p>
+                <p className="text-txt-3 leading-relaxed">80% of ETH from staking goes to epoch burners proportional to their burns. 20% goes to Buy & Burn, permanently reducing HBURN supply.</p>
+              </div>
+              <div className="bg-dark-3/60 rounded-lg p-4 border border-dark-5">
+                <div className="text-lg mb-2">🔗</div>
+                <p className="font-bold text-txt-1 mb-1">Build Your Streak</p>
+                <p className="text-txt-3 leading-relaxed">Burn in consecutive epochs to build a streak multiplier up to 3x. Your weighted burns are multiplied — bigger share without burning more tokens.</p>
+              </div>
+              <div className="bg-dark-3/60 rounded-lg p-4 border border-dark-5">
+                <div className="text-lg mb-2">♻️</div>
+                <p className="font-bold text-txt-1 mb-1">Perpetual Deflation</p>
+                <p className="text-txt-3 leading-relaxed">All burned TitanX and DragonX are sent to the dead address — permanently removed. Every epoch makes both tokens more scarce.</p>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -265,6 +293,13 @@ export default function Epochs() {
             <p className="text-center text-txt-3 py-8 text-sm">No past epochs with activity</p>
           ) : (
             <>
+              {/* Finalize All button if any unfinalized */}
+              {pastEpochs.some((e) => !e.finalized) && (
+                <button className="hb-btn w-full mb-4" onClick={handleFinalizeAll}>
+                  ⚡ Finalize All ({pastEpochs.filter((e) => !e.finalized).length} epoch{pastEpochs.filter((e) => !e.finalized).length > 1 ? "s" : ""})
+                </button>
+              )}
+
               <div className="space-y-2 mb-4">
                 {pastEpochs.map((e) => (
                   <div key={e.id} className="flex items-center justify-between bg-dark-3 rounded-lg px-4 py-3 border border-dark-5">
@@ -272,26 +307,22 @@ export default function Epochs() {
                       <span className="font-display font-bold text-sm">#{e.id}</span>
                       {!e.finalized ? (
                         <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                          Needs Finalization
+                          Pending
                         </span>
                       ) : e.reward > 0n ? (
                         <span className="text-green-400 font-bold text-sm">{fmtETH(e.reward)}</span>
                       ) : (
                         <span className="text-[10px] text-txt-3">
-                          {e.hasBurns ? "Claimed" : "No burns"}
+                          {e.hasBurns ? "Claimed ✓" : "No burns"}
                         </span>
                       )}
                     </div>
                     <div>
-                      {!e.finalized ? (
-                        <button className="hb-btn text-[10px] py-1.5 px-4" onClick={() => handleFinalize(e.id)}>
-                          ⚡ Finalize
-                        </button>
-                      ) : e.reward > 0n ? (
+                      {e.finalized && e.reward > 0n && (
                         <button className="hb-btn-outline text-[10px] py-1.5 px-4" onClick={() => handleClaim(e.id)}>
                           Claim ETH
                         </button>
-                      ) : null}
+                      )}
                     </div>
                   </div>
                 ))}

@@ -7,6 +7,7 @@ import Epochs from "@/pages/Epochs";
 import Staking from "@/pages/Staking";
 import Testnet from "@/pages/Testnet";
 import Portfolio from "@/pages/Portfolio";
+import Calculator from "@/pages/calculator";
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
           <Route path="epochs" element={<Epochs />} />
           <Route path="staking" element={<Staking />} />
           <Route path="portfolio" element={<Portfolio />} />
+		  <Route path="calculator" element={<Calculator />} />
           <Route path="testnet" element={<Testnet />} />
         </Route>
       </Routes>

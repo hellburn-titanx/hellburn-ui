@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { useWallet } from "@/hooks/useWallet";
 import { useGenesis, useTitanX, useHBURN } from "@/hooks/useContracts";
-import { ADDRESSES, WEEKS, TITANX_DISTRIBUTION, GENESIS_DURATION_DAYS, GENESIS_DURATION_HOURS } from "@/config/constants";
-import { fmt, fmtETH, bn, toWei, calcGenesisOutput, timeLeft } from "@/utils";
+import { ADDRESSES, WEEKS, TITANX_DISTRIBUTION, GENESIS_DURATION_DAYS, GENESIS_DURATION_HOURS, LP_RESERVE_PERCENT } from "@/config/constants";
+import { fmt, fmtETH, bn, toWei, calcGenesisOutput, calcLPReserve, timeLeft } from "@/utils";
 import TxModal from "@/components/TxModal";
 
 export default function Genesis() {
@@ -17,6 +17,7 @@ export default function Genesis() {
   const [week, setWeek] = useState(1);
   const [claimable, setClaimable] = useState(0n);
   const [stats, setStats] = useState(null);
+  const [lpStatus, setLpStatus] = useState(null);
   const [tx, setTx] = useState({ phase: null, msg: "", sub: "" });
 
   // Fetch data
@@ -24,7 +25,7 @@ export default function Genesis() {
     if (!genesis || !account) return;
     (async () => {
       try {
-        const [bal, hBal, w, claim, burned, minted, end, ended] = await Promise.all([
+        const [bal, hBal, w, claim, burned, minted, end, ended, lp] = await Promise.all([
           titanX.balanceOf(account),
           hburn.balanceOf(account),
           genesis.currentWeek(),
@@ -33,10 +34,12 @@ export default function Genesis() {
           genesis.totalHBURNMinted(),
           genesis.genesisEnd(),
           genesis.genesisEnded(),
+          genesis.lpInfo(),
         ]);
         setBalance(bal); setHburnBal(hBal); setWeek(Number(w));
         setClaimable(claim);
         setStats({ burned, minted, end, ended });
+        setLpStatus({ created: lp[0], tokenId: lp[1], reserveHBURN: lp[2], fundTitanX: lp[3] });
       } catch (e) { console.error(e); }
     })();
   }, [genesis, titanX, hburn, account, tx.phase]);
@@ -44,6 +47,7 @@ export default function Genesis() {
   const amt = parseFloat(input) || 0;
   const weekData = WEEKS[Math.min(3, Math.max(0, week - 1))];
   const hburnOut = calcGenesisOutput(amt, week);
+  const lpReserve = calcLPReserve(amt, week);
   const immediate = hburnOut * 0.25;
   const vested = hburnOut * 0.75;
   const balNum = bn(balance);
@@ -99,6 +103,10 @@ export default function Genesis() {
           Burn TitanX → Mint HBURN. Week {week}/4.{" "}
           {genesisActive ? `${hoursLeft}h left.` : "Genesis ended — minting closed."}
         </p>
+        {/* Fair Launch Badge */}
+        <div className="inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-[11px] font-semibold tracking-wider">
+          <span>🔗</span> FAIR LAUNCH — {LP_RESERVE_PERCENT}% LP Reserve · Trustless Liquidity
+        </div>
       </div>
 
       {/* Stats */}
@@ -125,14 +133,31 @@ export default function Genesis() {
           {!genesisActive ? (
             /* ── Genesis Ended State ───────────────────────── */
             <div className="text-center py-8">
-              <div className="text-5xl mb-4">🔒</div>
-              <h3 className="font-display font-bold text-lg text-txt-1 mb-2">Genesis Minting Closed</h3>
+              <div className="text-5xl mb-4">{lpStatus?.created ? "🔗" : "🔒"}</div>
+              <h3 className="font-display font-bold text-lg text-txt-1 mb-2">
+                {lpStatus?.created ? "Fair Launch Complete" : "Genesis Minting Closed"}
+              </h3>
               <p className="text-sm text-txt-2 mb-4">
-                The Genesis phase has ended. No more HBURN can be minted.
+                {lpStatus?.created
+                  ? "Liquidity pool created trustlessly by the smart contract. LP permanently locked."
+                  : "The Genesis phase has ended. No more HBURN can be minted."}
               </p>
               <div className="hb-output mb-4">
                 <div className="hb-output-row"><span className="text-xs text-txt-2">Total TitanX Burned</span><span className="font-bold text-fire-3">{stats ? fmt(stats.burned) : "—"}</span></div>
                 <div className="hb-output-row"><span className="text-xs text-txt-2">Total HBURN Minted</span><span className="font-bold text-green-400">{stats ? fmt(stats.minted) : "—"}</span></div>
+                {lpStatus?.created && (
+                  <>
+                    <hr className="hb-divider" />
+                    <div className="hb-output-row">
+                      <span className="text-xs text-txt-2">LP Status</span>
+                      <span className="text-emerald-400 text-xs font-bold">Locked Forever</span>
+                    </div>
+                    <div className="hb-output-row">
+                      <span className="text-xs text-txt-2">LP HBURN</span>
+                      <span className="text-xs">{fmt(lpStatus.reserveHBURN)}</span>
+                    </div>
+                  </>
+                )}
               </div>
               {claimable > 0n && (
                 <button className="hb-btn !from-green-600 !to-emerald-500" onClick={handleClaim}>
@@ -177,12 +202,17 @@ export default function Genesis() {
 
               {/* Output Preview */}
               <div className="hb-output">
-                <div className="hb-output-row"><span className="text-xs text-txt-2">You Receive</span><span className="font-display font-bold text-fire-3">{amt > 0 ? fmt(hburnOut) + " HBURN" : "—"}</span></div>
+                <div className="hb-output-row"><span className="text-xs text-txt-2">You Receive (97%)</span><span className="font-display font-bold text-fire-3">{amt > 0 ? fmt(hburnOut) + " HBURN" : "—"}</span></div>
                 <hr className="hb-divider" />
                 <div className="hb-output-row"><span className="text-xs text-txt-2">↳ Instant (25%)</span><span className="text-green-400 text-sm font-bold">{amt > 0 ? fmt(immediate) : "—"}</span></div>
                 <div className="hb-output-row"><span className="text-xs text-txt-2">↳ Vested (75%)</span><span className="text-txt-3 text-sm">{amt > 0 ? fmt(vested) : "—"}</span></div>
                 <hr className="hb-divider" />
-                <div className="hb-output-row"><span className="text-xs text-txt-2">Rate</span><span className="text-xs">{(weekData.ratio * weekData.bonus / 10000).toFixed(4)} HBURN/TITANX</span></div>
+                <div className="hb-output-row">
+                  <span className="text-xs text-txt-2">🔗 LP Reserve (3%)</span>
+                  <span className="text-emerald-400/70 text-xs">{amt > 0 ? fmt(lpReserve) + " HBURN" : "—"}</span>
+                </div>
+                <hr className="hb-divider" />
+                <div className="hb-output-row"><span className="text-xs text-txt-2">Rate</span><span className="text-xs">{(weekData.ratio * weekData.bonus / 10000 * 0.97).toFixed(4)} HBURN/TITANX</span></div>
               </div>
 
               <button className="hb-btn" onClick={handleBurn}
@@ -209,6 +239,35 @@ export default function Genesis() {
                   <span className="ml-auto font-bold text-txt-1">{d.pct}%</span>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Fair Launch LP Info */}
+          <div className="hb-card border-emerald-500/15 bg-gradient-to-br from-emerald-500/5 to-teal-500/3">
+            <div className="hb-label"><span className="dot" style={{ background: "#10b981" }} /> Fair Launch LP</div>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] text-txt-3 uppercase tracking-wider">LP HBURN Reserve</span>
+                <span className="font-display font-bold text-sm text-emerald-400">
+                  {lpStatus ? fmt(lpStatus.reserveHBURN) : "—"}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] text-txt-3 uppercase tracking-wider">LP TitanX Fund (8%)</span>
+                <span className="font-display font-bold text-sm">
+                  {lpStatus ? fmt(lpStatus.fundTitanX) : "—"}
+                </span>
+              </div>
+              <hr className="hb-divider" />
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] text-txt-3 uppercase tracking-wider">Status</span>
+                <span className={`text-xs font-bold ${lpStatus?.created ? "text-emerald-400" : "text-amber-400"}`}>
+                  {lpStatus?.created ? "LP Created & Locked" : "Accumulating..."}
+                </span>
+              </div>
+              <p className="text-[10px] text-txt-3 leading-relaxed">
+                At Genesis end, the contract auto-creates a Uniswap V3 LP from the accumulated reserves. No insider tokens. Fully trustless.
+              </p>
             </div>
           </div>
 

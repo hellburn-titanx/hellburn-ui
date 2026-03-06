@@ -1,13 +1,13 @@
 // ─── Deployed Addresses (Sepolia) ─────────────────────────────────
 // Update these after mainnet deployment
 export const ADDRESSES = {
-  hellBurnToken: "0x5a1A7f60B872f0A6F9Bc9935484aE9e813899860",
-  genesisBurn: "0x57a2e10C64936FBCCdF1A6522A67B9a6C6bcc644",
-  burnEpochs: "0x3b2956EAb2EB94409Ed47922c3057Cab576F8828",
-  hellBurnStaking: "0xD748e6A93A182f424948d9a0F29785798334dFD0",
-  buyAndBurn: "0x691544332a66e1d53ae6904b3F7B3E6259AADb30",
-  titanX: "0xd2F698c37C1447a0312459A09296577958864196",
-  dragonX: "0xc6bC262DF37FaE51a1d2Dd61c402Dc52A8CC9AC3",
+  hellBurnToken: "0xBBb9fA28a0f63dCBd9bf7EB743ED496e463765A8",
+  genesisBurn: "0x980E6760cbAE7E7205B17F4fD711D1Fa82AB9D13",
+  burnEpochs: "0xd61Fd49641EB17330875477B1d5C91535FA4Db49",
+  hellBurnStaking: "0xbf694F9e22dbF042b802bF469006086354995e5A",
+  buyAndBurn: "0x5059242113DA07ae68AfA3dB9E3292FC6Ba7Ca35",
+  titanX: "0x0A075a189552b57378b70380679642eF49Ea4A7E",
+  dragonX: "0xca8746Cbef19257553e15Adc2a099125D702fc6e",
 };
 
 // ─── Chain ────────────────────────────────────────────────────────
@@ -16,6 +16,7 @@ export const CHAIN_NAME = "Sepolia";
 export const RPC_URL = "https://eth-sepolia.g.alchemy.com/v2/demo";
 
 // ─── Tokenomics Constants ─────────────────────────────────────────
+export const LP_RESERVE_PERCENT = 3; // 3% of minted HBURN → LP reserve
 export const GENESIS_DURATION_DAYS = 28;
 export const GENESIS_DURATION_HOURS = 12; // Beta: 12h instead of 28 days
 export const EPOCH_DURATION_DAYS = 8;
@@ -34,7 +35,7 @@ export const TITANX_DISTRIBUTION = [
   { label: "Permanent Burn", pct: 35, color: "#ff4500", icon: "🔥" },
   { label: "DragonX Vault", pct: 35, color: "#8b5cf6", icon: "🐉" },
   { label: "Treasury Stake", pct: 22, color: "#f59e0b", icon: "🏦" },
-  { label: "Genesis Fund", pct: 8, color: "#64748b", icon: "⚙️" },
+  { label: "LP Fund (Fair Launch)", pct: 8, color: "#64748b", icon: "🔗" },
 ];
 
 export const STAKE_TIERS = [
@@ -60,8 +61,8 @@ export const EXPLORER_BASE = CHAIN_ID === 1
 export const LINKS = {
   whitepaper: "#",          // TODO: update with real URL
   gitbook: "#",             // TODO: update with GitBook docs URL
-  twitter: "#",             // TODO: https://twitter.com/hellburn
-  telegram: "#",            // TODO: https://t.me/hellburn
+  twitter: "https://x.com/hellburn_titanx",
+  telegram: "https://t.me/hellburn_crypto",            // TODO: https://t.me/hellburn
   discord: "#",             // TODO: https://discord.gg/hellburn
   dexscreener: "#",         // TODO: https://dexscreener.com/ethereum/...
   titanx: "https://titanx.win",

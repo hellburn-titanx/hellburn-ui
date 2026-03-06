@@ -176,20 +176,45 @@ export default function Staking() {
         </p>
       </div>
 
-      {/* Genesis Lock Overlay */}
+      {/* Genesis Lock Overlay with How It Works */}
       {genesisActive && (
-        <div className="hb-card border-fire-2/20 bg-gradient-to-br from-fire-1/5 to-dark-2 text-center py-12">
-          <div className="text-5xl mb-4">🔒</div>
-          <h2 className="font-display font-bold text-xl text-txt-1 mb-2">Staking Unlocks After Genesis</h2>
-          <p className="text-sm text-txt-2 mb-2">
-            Stake your HBURN to earn a share of the 20% ETH from each Burn Epoch.
-          </p>
-          <p className="text-xs text-txt-3 mb-6">
-            Genesis ends in: <span className="font-bold text-fire-3">{genesisEnd ? timeLeft(genesisEnd) : "—"}</span>
-          </p>
-          <Link to="/genesis" className="hb-btn-outline inline-block">
-            Go to Genesis →
-          </Link>
+        <div className="hb-card border-fire-2/20 bg-gradient-to-br from-fire-1/5 to-dark-2 py-10">
+          <div className="text-center mb-8">
+            <div className="text-5xl mb-4">🔒</div>
+            <h2 className="font-display font-bold text-xl text-txt-1 mb-2">Staking Unlocks After Genesis</h2>
+            <p className="text-xs text-txt-3 mb-4">
+              Genesis ends in: <span className="font-bold text-fire-3">{genesisEnd ? timeLeft(genesisEnd) : "—"}</span>
+            </p>
+            <Link to="/genesis" className="hb-btn-outline inline-block">
+              Go to Genesis →
+            </Link>
+          </div>
+
+          <div className="border-t border-dark-5 pt-6 mx-4 sm:mx-8">
+            <h3 className="text-sm font-bold text-txt-1 mb-4 text-center">How HBURN Staking Works</h3>
+            <div className="grid sm:grid-cols-2 gap-4 text-[12px]">
+              <div className="bg-dark-3/60 rounded-lg p-4 border border-dark-5">
+                <div className="text-lg mb-2">📈</div>
+                <p className="font-bold text-txt-1 mb-1">Stake HBURN, Earn ETH</p>
+                <p className="text-txt-3 leading-relaxed">Lock your HBURN tokens to receive shares. 20% of all Epoch ETH flows to stakers — longer stakes earn more shares.</p>
+              </div>
+              <div className="bg-dark-3/60 rounded-lg p-4 border border-dark-5">
+                <div className="text-lg mb-2">◆</div>
+                <p className="font-bold text-txt-1 mb-1">5 Tier System</p>
+                <p className="text-txt-3 leading-relaxed">Bronze (28d) → Silver (90d) → Gold (369d) → Platinum (888d) → Diamond (3500d). Higher tiers get up to 3.5x share bonus.</p>
+              </div>
+              <div className="bg-dark-3/60 rounded-lg p-4 border border-dark-5">
+                <div className="text-lg mb-2">⛽</div>
+                <p className="font-bold text-txt-1 mb-1">Fuel Your Stake</p>
+                <p className="text-txt-3 leading-relaxed">Burn TitanX or DragonX as fuel to boost an active stake. More shares without extending the lock period.</p>
+              </div>
+              <div className="bg-dark-3/60 rounded-lg p-4 border border-dark-5">
+                <div className="text-lg mb-2">🔥</div>
+                <p className="font-bold text-txt-1 mb-1">Phoenix Status</p>
+                <p className="text-txt-3 leading-relaxed">Complete 3 stakes to unlock Phoenix — a permanent bonus on all future stakes. Re-staking builds consecutive bonuses.</p>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

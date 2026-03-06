@@ -19,9 +19,9 @@ export default function FireCanvas() {
       for (let i = 0; i < 2; i++) {
         particles.current.push({
           x: Math.random() * c.width, y: c.height + 10,
-          vx: (Math.random() - 0.5) * 1.5, vy: -(1.5 + Math.random() * 3),
+          vx: (Math.random() - 0.5) * 1.5, vy: -(2 + Math.random() * 4),
           r: 1.5 + Math.random() * 3, life: 1,
-          decay: 0.003 + Math.random() * 0.008,
+          decay: 0.001 + Math.random() * 0.004,
           hue: 10 + Math.random() * 30,
         });
       }
@@ -43,5 +43,5 @@ export default function FireCanvas() {
     return () => { cancelAnimationFrame(raf.current); window.removeEventListener("resize", resize); };
   }, []);
 
-  return <canvas ref={ref} className="fixed inset-0 w-full h-full opacity-30 pointer-events-none z-0" />;
+  return <canvas ref={ref} className="fixed inset-0 w-full h-full opacity-30 pointer-events-none z-[1]" />;
 }
