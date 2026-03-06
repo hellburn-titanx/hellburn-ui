@@ -1,13 +1,13 @@
 // ─── Deployed Addresses (Sepolia) ─────────────────────────────────
 // Update these after mainnet deployment
 export const ADDRESSES = {
-  hellBurnToken: "0xBBb9fA28a0f63dCBd9bf7EB743ED496e463765A8",
-  genesisBurn: "0x980E6760cbAE7E7205B17F4fD711D1Fa82AB9D13",
-  burnEpochs: "0xd61Fd49641EB17330875477B1d5C91535FA4Db49",
-  hellBurnStaking: "0xbf694F9e22dbF042b802bF469006086354995e5A",
-  buyAndBurn: "0x5059242113DA07ae68AfA3dB9E3292FC6Ba7Ca35",
-  titanX: "0x0A075a189552b57378b70380679642eF49Ea4A7E",
-  dragonX: "0xca8746Cbef19257553e15Adc2a099125D702fc6e",
+  hellBurnToken: "0xE96ff25b301cf99e90C657a8cC10565DAdFD01F8",
+  genesisBurn: "0x92c78B689a9E0E4daA85823b0aFc837Cc2d67206",
+  burnEpochs: "0x2E2c7e011e0fD8043EB76Ce28ad74eC9CF963f3b",
+  hellBurnStaking: "0x44F896671e0187dc51B956Fb431f8d380bC3e04F",
+  buyAndBurn: "0x3B3adbaf4167129C75342C54a2cb9C8755157349",
+  titanX: "0xbE57b315975bFbcB992C76DC28fb21DeAa4A403D",
+  dragonX: "0x66bBD615975e4f88D629797f0D04209C9891c47D",
 };
 
 // ─── Chain ────────────────────────────────────────────────────────
