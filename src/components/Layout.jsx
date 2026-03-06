@@ -20,12 +20,35 @@ const CONTRACT_LINKS = [
   { label: "Buy & Burn", addr: ADDRESSES.buyAndBurn },
 ];
 
+const TelegramIcon = () => (
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+    <path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/>
+  </svg>
+);
+
 const SOCIAL_ITEMS = [
-  /*{ label: "𝕏 Twitter", href: LINKS.twitter, icon: "𝕏" },
-  { label: "Telegram", href: LINKS.telegram, icon: "✈" },
-  { label: "Discord", href: LINKS.discord, icon: "💬" },*/
+  { label: "𝕏 Twitter", href: LINKS.twitter, icon: "𝕏" },
+  { label: "Telegram", href: LINKS.telegram, icon: <TelegramIcon /> },
+  /*{ label: "Discord", href: LINKS.discord, icon: "💬" },*/
 ];
 
+const addHBURNToWallet = async () => {
+  if (!window.ethereum) return;
+  try {
+    await window.ethereum.request({
+      method: "wallet_watchAsset",
+      params: {
+        type: "ERC20",
+        options: {
+          address: ADDRESSES.hellBurnToken,
+          symbol: "HBURN",
+          decimals: 18,
+          image: window.location.origin + "/scorch-icon.png",
+        },
+      },
+    });
+  } catch {}
+};
 export default function Layout() {
   const { account, shortAddr, connecting, isCorrectChain, connect, disconnect, switchChain } = useWallet();
   const genesis = useGenesis();
@@ -57,11 +80,11 @@ export default function Layout() {
       {/* Scorch Background — subtle on subpages, Dashboard has its own hero */}
       <div className="fixed inset-0 z-0" aria-hidden="true">
         <div className="absolute inset-0" style={{
-          backgroundImage: "url('/scorch-bg.png')",
+          backgroundImage: "url('/hellburn.png')",
           backgroundSize: "cover",
           backgroundPosition: "center 15%",
           backgroundRepeat: "no-repeat",
-          opacity: 0.08,
+          opacity: 0.8,
         }} />
         <div className="absolute inset-0" style={{
           background: "radial-gradient(ellipse at 50% 40%, transparent 20%, rgba(5,5,8,0.7) 70%, rgba(5,5,8,0.95) 100%)",
@@ -202,9 +225,10 @@ export default function Layout() {
 
       {/* Footer */}
       <footer className="relative z-10 border-t border-white/[0.04] mt-auto" style={{
-        background: "rgba(5, 5, 8, 0.35)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
+        background: "rgba(5, 5, 8, 0.25)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+		opacity: 0.5
       }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -213,7 +237,7 @@ export default function Layout() {
             <div>
               <div className="font-display font-black text-xl fire-text tracking-tight mb-3">HELLBURN</div>
               <p className="text-xs text-txt-3 leading-relaxed mb-4">
-                Competitive Burn-to-Earn protocol</p>
+                Competitive Burn-to-Earn protocol built on the TitanX ecosystem.</p>
               <div className="flex gap-2">
                 {SOCIAL_ITEMS.map((s) => (
                   <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer"
@@ -233,7 +257,6 @@ export default function Layout() {
                   className="block text-xs text-txt-2 hover:text-fire-3 transition-colors">
                   📄 Whitepaper
                 </a>
-               
               </div>
             </div>
 
@@ -257,15 +280,37 @@ export default function Layout() {
               <h4 className="text-[10px] uppercase tracking-[2px] text-txt-3 mb-3">Verified Contracts</h4>
               <div className="space-y-1.5">
                 {CONTRACT_LINKS.map((c) => (
-                  <a key={c.label}
-                    href={`${EXPLORER_BASE}/address/${c.addr}`}
-                    target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-2 group text-xs">
-                    <span className="text-txt-2 group-hover:text-fire-3 transition-colors">{c.label}</span>
-                    <span className="font-mono text-[9px] text-txt-3 group-hover:text-fire-2 transition-colors">
-                      {c.addr.slice(0, 6)}...{c.addr.slice(-4)}
-                    </span>
-                  </a>
+                  <div key={c.label} className="flex items-center gap-2 group text-xs">
+                    <a
+                      href={`${EXPLORER_BASE}/address/${c.addr}`}
+                      target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-2 min-w-0">
+                      <span className="text-txt-2 group-hover:text-fire-3 transition-colors">{c.label}</span>
+                      <span className="font-mono text-[9px] text-txt-3 group-hover:text-fire-2 transition-colors">
+                        {c.addr.slice(0, 6)}...{c.addr.slice(-4)}
+                      </span>
+                    </a>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        navigator.clipboard.writeText(c.addr);
+                        const btn = e.currentTarget;
+                        btn.textContent = "✓";
+                        btn.classList.add("!text-green-400");
+                        setTimeout(() => { btn.textContent = "⧉"; btn.classList.remove("!text-green-400"); }, 1500);
+                      }}
+                      className="text-txt-3 hover:text-fire-3 transition-colors text-[11px] flex-shrink-0 cursor-pointer"
+                      title={`Copy ${c.addr}`}>
+                      ⧉
+                    </button>
+					{c.addr === ADDRESSES.hellBurnToken && (
+					  <button onClick={addHBURNToWallet}
+						className="text-[9px] px-1.5 py-0.5 rounded bg-fire-1/10 border border-fire-2/30 text-fire-3 hover:bg-fire-1/20 transition-colors whitespace-nowrap flex-shrink-0"
+						title="Add HBURN token to MetaMask">
+						🦊+
+					  </button>
+					)}
+                  </div>
                 ))}
               </div>
             </div>

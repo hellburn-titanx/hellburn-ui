@@ -48,20 +48,31 @@ export function toWei(val) {
   catch { return 0n; }
 }
 
-// Calculate HBURN output for genesis
+// Calculate HBURN output for genesis (user receives 97%, 3% → LP reserve)
 export function calcGenesisOutput(titanXAmount, weekNum) {
   const ratios = [100, 95, 90, 85];
   const bonuses = [115, 110, 105, 100];
   const w = Math.max(0, Math.min(3, weekNum - 1));
-  return (titanXAmount * ratios[w] * bonuses[w]) / 10000;
+  const total = (titanXAmount * ratios[w] * bonuses[w]) / 10000;
+  const userAmount = total * 0.97; // 3% goes to LP reserve
+  return userAmount;
 }
 
-
-export function getWhitepaperUrl() {
-  const lang = (navigator.language || navigator.userLanguage || "en").toLowerCase();
-  const isGerman = lang.startsWith("de");
-  return isGerman ? "/HellBurn_Whitepaper_v2.0_DE.pdf" : "/HellBurn_Whitepaper_v2.0_EN.pdf";
+// Calculate LP reserve portion
+export function calcLPReserve(titanXAmount, weekNum) {
+  const ratios = [100, 95, 90, 85];
+  const bonuses = [115, 110, 105, 100];
+  const w = Math.max(0, Math.min(3, weekNum - 1));
+  const total = (titanXAmount * ratios[w] * bonuses[w]) / 10000;
+  return total * 0.03;
 }
 
 // Sleep helper for TX animations
 export function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
+
+// Whitepaper — DE for German-speaking regions, EN for everyone else
+export function getWhitepaperUrl() {
+  const lang = (navigator.language || navigator.userLanguage || "en").toLowerCase();
+  const isGerman = lang.startsWith("de");
+  return isGerman ? "/HellBurn_Whitepaper_v3.0_DE.pdf" : "/HellBurn_Whitepaper_v3.0_EN.pdf";
+}
