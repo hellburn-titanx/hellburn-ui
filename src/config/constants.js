@@ -61,7 +61,7 @@ export const EXPLORER_BASE = CHAIN_ID === 1
 export const LINKS = {
   whitepaper: "#",          // TODO: update with real URL
   gitbook: "#",             // TODO: update with GitBook docs URL
-  twitter: "https://x.com/hellburn_titanx",
+  twitter: "https://x.com/HellburnTitanX",
   telegram: "https://t.me/hellburn_crypto",            // TODO: https://t.me/hellburn
   discord: "#",             // TODO: https://discord.gg/hellburn
   dexscreener: "#",         // TODO: https://dexscreener.com/ethereum/...
