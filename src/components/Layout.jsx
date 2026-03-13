@@ -49,10 +49,11 @@ const addHBURNToWallet = async () => {
     });
   } catch {}
 };
+
 export default function Layout() {
   const { account, shortAddr, connecting, isCorrectChain, connect, disconnect, switchChain } = useWallet();
   const genesis = useGenesis();
-  const [genesisActive, setGenesisActive] = useState(false);
+  const [genesisActive, setGenesisActive] = useState(true);
   const isTestnet = CHAIN_ID !== 1;
 
   // Track genesis state for phase indicators
@@ -67,7 +68,7 @@ export default function Layout() {
         const now = Math.floor(Date.now() / 1000);
         // Genesis is inactive if ended flag set OR time has passed
         setGenesisActive(!ended && now <= Number(genesisEnd));
-      } catch { /* fallback: assume active */ }
+      } catch { setGenesisActive(true); /* fallback: assume genesis active */ }
     })();
   }, [genesis]);
 
@@ -237,7 +238,9 @@ export default function Layout() {
             <div>
               <div className="font-display font-black text-xl fire-text tracking-tight mb-3">HELLBURN</div>
               <p className="text-xs text-txt-3 leading-relaxed mb-4">
-                Competitive Burn-to-Earn protocol built on the TitanX ecosystem.</p>
+                Competitive Burn-to-Earn protocol built on the TitanX ecosystem.
+                Fully Trustless. No Admin Keys. Perpetual deflation. Real ETH yield.
+              </p>
               <div className="flex gap-2">
                 {SOCIAL_ITEMS.map((s) => (
                   <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer"
@@ -256,6 +259,10 @@ export default function Layout() {
                 <a href={getWhitepaperUrl()} target="_blank" rel="noopener noreferrer"
                   className="block text-xs text-txt-2 hover:text-fire-3 transition-colors">
                   📄 Whitepaper
+                </a>
+                <a href="/HellBurn_Audit_SpyWolf.pdf" target="_blank" rel="noopener noreferrer"
+                  className="block text-xs text-txt-2 hover:text-fire-3 transition-colors">
+                  🔍 SpyWolf Security Audit
                 </a>
               </div>
             </div>
@@ -319,7 +326,7 @@ export default function Layout() {
           {/* Bottom bar */}
           <div className="mt-8 pt-6 border-t border-dark-5 flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="text-[10px] text-txt-3">
-              ⚠️ Smart contracts are unaudited. Use at your own risk. DYOR.
+              ✅ Smart contracts audited by <a href="/HellBurn_Audit_SpyWolf.pdf" target="_blank" rel="noopener noreferrer" className="underline hover:text-fire-3 transition-colors">SpyWolf Security</a>. Use at your own risk. DYOR.
             </p>
             <p className="text-[10px] text-txt-3">
               HellBurn Protocol © {new Date().getFullYear()} — Built on TitanX

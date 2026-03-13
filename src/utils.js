@@ -74,5 +74,5 @@ export function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
 export function getWhitepaperUrl() {
   const lang = (navigator.language || navigator.userLanguage || "en").toLowerCase();
   const isGerman = lang.startsWith("de");
-  return isGerman ? "/HellBurn_Whitepaper_v3.0_DE.pdf" : "/HellBurn_Whitepaper_v3.0_EN.pdf";
+  return isGerman ? "/HellBurn_Whitepaper_v4.0_DE.pdf" : "/HellBurn_Whitepaper_v4.0_EN.pdf";
 }

@@ -143,6 +143,11 @@ export default function Staking() {
   const handleFuel = useCallback(async () => {
     if (fuelStakeId === null || !fuelAmount) return;
     const weiAmt = toWei(fuelAmount);
+    // [L-03] Contract enforces >= 1 TitanX minimum for fuel
+    if (weiAmt < 1_000_000_000_000_000_000n) {
+      setTx({ phase: "error", msg: "Minimum fuel is 1 TitanX" });
+      return;
+    }
     try {
       setTx({ phase: "pending", msg: "Approving TitanX for fuel...", sub: "" });
       const allowance = await titanX.allowance(account, ADDRESSES.hellBurnStaking);

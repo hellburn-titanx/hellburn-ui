@@ -62,7 +62,8 @@ export default function Dashboard() {
   }, [genesis, epochs, staking, buyBurn, hburn, account]);
 
   const TRUST_POINTS = [
-    { icon: "🔐", title: "No Admin Key", desc: "No owner, no multisig, no upgrade proxy. Once deployed, the contracts are immutable." },
+    { icon: "🔐", title: "No Admin Key", desc: "No owner, no guardian, no pause, no upgrade proxy. Once deployed, the contracts run autonomously forever." },
+    { icon: "🏦", title: "Trustless Treasury", desc: "22% TitanX auto-staked in contract for 3,500 days. No one can withdraw. ETH yield flows to BuyAndBurn." },
     { icon: "🔗", title: "Fair Launch LP", desc: "3% LP reserve + 8% TitanX fund — the contract creates the Uniswap V3 LP automatically. No insider tokens." },
     { icon: "🔥", title: "LP Locked Forever", desc: "The LP-NFT is permanently held by the contract. No withdraw function exists. Nobody can rug." },
     { icon: "📜", title: "Fully Verified", desc: "All contracts verified on Etherscan. Read the code yourself — every function, every line." },
@@ -70,42 +71,40 @@ export default function Dashboard() {
 
   return (
     <>
-      {/* ═══ HERO — Scorch fullscreen ═══ */}
-     <section className="relative -mx-4 sm:-mx-6 -mt-16 sm:-mt-24 mb-6">
-	  <div className="relative w-full pt-20 sm:pt-28 pb-10 sm:pb-14 text-center">
-		<h1 className="font-display font-black text-5xl sm:text-6xl lg:text-7xl mb-3 tracking-tight">
-		  <span className="fire-text">Hell</span><span className="fire-text">Burn</span>
-		</h1>
-		<p className="text-txt-2 text-sm sm:text-base leading-relaxed max-w-lg mx-auto mb-5">
-		  Fair Launch Burn-to-Earn Protocol.<br />
-		  Trustless LP. Perpetual TitanX &amp; DragonX deflation. Real ETH yield.
-		</p>
-		<div className="flex flex-wrap gap-3 justify-center">
-		  <Link to="/genesis" className="hb-btn inline-block w-auto text-sm px-8 py-3">
-			Enter Genesis →
-		  </Link>
-		  <a href={getWhitepaperUrl()} target="_blank" rel="noopener noreferrer" className="hb-btn-outline inline-flex items-center gap-2 text-sm px-6 py-3">
-			📄 Whitepaper
-		  </a>
-		</div>
-	  </div>
-	</section>
+      {/* ═══ COMPACT HERO ═══ */}
+      <section className="relative -mx-4 sm:-mx-6 -mt-16 sm:-mt-24 mb-6">
+        <div className="relative w-full pt-20 sm:pt-28 pb-10 sm:pb-14 text-center">
+          <h1 className="font-display font-black text-5xl sm:text-6xl lg:text-7xl mb-3 tracking-tight">
+            <span className="fire-text">Hell</span><span className="fire-text">Burn</span>
+          </h1>
+          <p className="text-txt-2 text-sm sm:text-base leading-relaxed max-w-lg mx-auto mb-5">
+            Fair Launch Burn-to-Earn Protocol.<br />
+            Fully Trustless. 
+          </p>
+          <div className="flex flex-wrap gap-3 justify-center">
+            
+            <a href={getWhitepaperUrl()} target="_blank" rel="noopener noreferrer" className="hb-btn-outline inline-flex items-center gap-2 text-sm px-6 py-3">
+              📄 Whitepaper
+            </a>
+          </div>
+        </div>
+      </section>
 
       <div className="space-y-6">
 
-        {/* ═══ HOW IT WORKS — moved above stats ═══ */}
+        {/* ═══ HOW IT WORKS ═══ */}
         <div className="hb-card">
           <h2 className="font-display font-bold text-xl text-txt-1 text-center mb-6">How HellBurn Works</h2>
           <p className="text-sm text-txt-2 text-center mb-8 max-w-2xl mx-auto">
-            A Fair Launch Burn-to-Earn protocol. Burn TitanX &amp; DragonX to earn ETH, stake HBURN for yield, and benefit from perpetual deflation. Trustless LP — no insider tokens.
+            A Fair Launch Burn-to-Earn protocol. Burn TitanX &amp; DragonX to earn ETH, stake HBURN for yield, and benefit from perpetual deflation. Fully trustless — no admin keys, no guardian, no pause.
           </p>
 
           <div className="grid sm:grid-cols-4 gap-4 mb-6">
             {/* Phase 0 — Trust */}
             <div className="bg-emerald-500/[0.04] rounded-xl p-5 border border-emerald-500/20 text-center">
               <div className="inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 mb-3">0</div>
-              <h3 className="font-bold text-sm text-emerald-400 mb-2">Fair Launch</h3>
-              <p className="text-[12px] text-txt-3 leading-relaxed">No admin key. No team tokens. LP created trustlessly by the contract and locked forever. Fully verified on Etherscan.</p>
+              <h3 className="font-bold text-sm text-emerald-400 mb-2">Fully Trustless</h3>
+              <p className="text-[12px] text-txt-3 leading-relaxed">No admin key. No guardian. No pause. Treasury auto-staked in contract. LP locked forever. Verified on Etherscan.</p>
             </div>
 
             {/* Phase 1 — Genesis */}
@@ -148,12 +147,12 @@ export default function Dashboard() {
           <div className="bg-dark-3/40 rounded-lg p-4 border border-dark-5">
             <h4 className="text-xs font-bold text-txt-2 mb-2 text-center">The Flywheel</h4>
             <p className="text-[11px] text-txt-3 text-center max-w-xl mx-auto leading-relaxed">
-              Fair Launch LP (auto-created) &rarr; Epoch burns &rarr; ETH split: 80% to stakers, 20% to Buy &amp; Burn &rarr; HBURN bought &amp; burned &rarr; supply decreases &rarr; value increases &rarr; more incentive to burn &amp; stake. LP fees also fuel the burn.
+              Fair Launch LP (auto-created) &rarr; Epoch burns &rarr; ETH split: 80% to burners, 20% to Buy &amp; Burn &rarr; HBURN bought &amp; burned &rarr; supply decreases &rarr; value increases &rarr; more incentive to burn &amp; stake. Treasury yield + LP fees also fuel the burn.
             </p>
           </div>
         </div>
 
-        {/* ═══ STATS — now below How It Works ═══ */}
+        {/* ═══ STATS ═══ */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           <div className="hb-stat">
             <div className="num">{data ? fmt(data.totalTitanBurned) : "—"}</div>
