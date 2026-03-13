@@ -13,7 +13,7 @@ export default function Epochs() {
   const dragonX = useDragonX();
   const genesis = useGenesis();
 
-  const [genesisActive, setGenesisActive] = useState(false);
+  const [genesisActive, setGenesisActive] = useState(true);
   const [genesisEnd, setGenesisEnd] = useState(0);
   const [token, setToken] = useState("titanX"); // "titanX" | "dragonX"
   const [input, setInput] = useState("");
@@ -25,6 +25,7 @@ export default function Epochs() {
   const [pastEpochs, setPastEpochs] = useState([]);
   const [tx, setTx] = useState({ phase: null, msg: "", sub: "" });
   const [tick, setTick] = useState(0);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Live countdown
   useEffect(() => {
@@ -75,23 +76,28 @@ export default function Epochs() {
 
         // Load past epochs with user participation
         const past = [];
+        console.log(`[Epochs] Loading past epochs: ${Math.max(0, eid - 10)} to ${eid - 1}`);
         for (let i = Math.max(0, eid - 10); i < eid; i++) {
           const [myBurnPast, epochInfo] = await Promise.all([
             epochs.getUserEpochBurn(i, account),
             epochs.epochs(i),
           ]);
-          const finalized = epochInfo.finalized;
+		  
+		  const finalized = epochInfo.finalized ?? epochInfo[3];
+		  const ethDeposited = epochInfo.ethDeposited ?? epochInfo[0];
           const pending = finalized ? await epochs.pendingReward(i, account) : 0n;
           const hasBurns = myBurnPast > 0n;
+          //console.log(`[Epochs] #${i}: finalized=${finalized} hasBurns=${hasBurns} reward=${pending}`);
           // Show if: user burned (needs finalize or claim) OR not finalized (anyone can finalize)
           if (hasBurns || !finalized) {
-            past.push({ id: i, reward: pending, finalized, hasBurns, ethDeposited: epochInfo.ethDeposited });
+            past.push({ id: i, reward: pending, finalized, hasBurns, ethDeposited: ethDeposited });
           }
         }
+        //console.log(`[Epochs] Showing ${past.length} epochs`);
         setPastEpochs(past);
       } catch (e) { console.error(e); }
     })();
-  }, [epochs, titanX, dragonX, account, tx.phase]);
+  }, [epochs, titanX, dragonX, account, refreshKey]);
 
   const bal = token === "titanX" ? balTX : balDX;
   const amt = parseFloat(input) || 0;
@@ -136,20 +142,38 @@ export default function Epochs() {
     }
   }, [epochs]);
 
-  // Finalize all pending epochs in one tx via finalizeUpTo (contract handles sequential order)
+  // Finalize all pending epochs — queries nextEpochToFinalize from contract for safety
   const handleFinalizeAll = useCallback(async () => {
-    const unfinalized = pastEpochs.filter((e) => !e.finalized).sort((a, b) => a.id - b.id);
-    if (unfinalized.length === 0) return;
-    const lastId = unfinalized[unfinalized.length - 1].id;
-    try {
-      setTx({ phase: "pending", msg: `Finalizing ${unfinalized.length} epoch${unfinalized.length > 1 ? "s" : ""}...`, sub: "Single transaction — confirm in wallet" });
-      const finTx = await epochs.finalizeUpTo(lastId);
-      await finTx.wait();
-      setTx({ phase: "success", msg: `${unfinalized.length} Epoch${unfinalized.length > 1 ? "s" : ""} Finalized!`, sub: "Rewards are now claimable" });
-    } catch (err) {
-      setTx({ phase: "error", msg: err.reason || "Finalize failed" });
+  try {
+    const nextToFinalize = Number(await epochs.nextEpochToFinalize());
+    const currentEpoch = Number(await epochs.currentEpochId());
+    console.log(`[FinalizeAll] next=${nextToFinalize} current=${currentEpoch}`);
+
+    if (nextToFinalize >= currentEpoch) {
+      console.log("[FinalizeAll] All already finalized — refreshing list");
+      setRefreshKey((k) => k + 1);
+      return;
     }
-  }, [epochs, pastEpochs]);
+
+    const targetEpoch = currentEpoch - 1;
+    setTx({ phase: "pending", msg: `Finalizing Epochs #${nextToFinalize} – #${targetEpoch}...`, sub: `${targetEpoch - nextToFinalize + 1} epochs in one transaction` });
+
+    const finTx = await epochs.finalizeUpTo(targetEpoch);
+    await finTx.wait();
+
+    setTx({ phase: "success", msg: `Epochs #${nextToFinalize} – #${targetEpoch} Finalized!`, sub: "Rewards are now claimable" });
+    setRefreshKey((k) => k + 1);
+
+	// RPC-Node Zeit geben den State zu indexieren
+	await new Promise(resolve => setTimeout(resolve, 2500));
+
+	setRefreshKey((k) => k + 1);
+  } catch (err) {
+    console.error("Finalize error:", err);
+    const reason = err.reason || err.data?.message || err.message?.slice(0, 120) || "Finalize failed";
+    setTx({ phase: "error", msg: reason, sub: "" });
+  }
+}, [epochs]);
 
   // Batch claim
   const handleBatchClaim = useCallback(async () => {
@@ -353,7 +377,7 @@ export default function Epochs() {
       </div>
       </>)}
 
-      <TxModal phase={tx.phase} message={tx.msg} subtext={tx.sub} onClose={() => setTx({ phase: null })} />
+      <TxModal phase={tx.phase} message={tx.msg} subtext={tx.sub} onClose={() => { setTx({ phase: null }); setRefreshKey((k) => k + 1); }} />
     </div>
   );
 }

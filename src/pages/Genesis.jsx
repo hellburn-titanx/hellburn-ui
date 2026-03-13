@@ -18,6 +18,7 @@ export default function Genesis() {
   const [claimable, setClaimable] = useState(0n);
   const [stats, setStats] = useState(null);
   const [lpStatus, setLpStatus] = useState(null);
+  const [treasuryStatus, setTreasuryStatus] = useState(null);
   const [tx, setTx] = useState({ phase: null, msg: "", sub: "" });
 
   // Fetch data
@@ -35,11 +36,13 @@ export default function Genesis() {
           genesis.genesisEnd(),
           genesis.genesisEnded(),
           genesis.lpInfo(),
+          genesis.treasuryInfo(),
         ]);
         setBalance(bal); setHburnBal(hBal); setWeek(Number(w));
         setClaimable(claim);
         setStats({ burned, minted, end, ended });
         setLpStatus({ created: lp[0], tokenId: lp[1], reserveHBURN: lp[2], fundTitanX: lp[3] });
+        setTreasuryStatus({ titanX: treasury[0], staked: treasury[1] });
       } catch (e) { console.error(e); }
     })();
   }, [genesis, titanX, hburn, account, tx.phase]);
@@ -56,6 +59,11 @@ export default function Genesis() {
   const handleBurn = useCallback(async () => {
     if (!genesis || amt <= 0) return;
     const weiAmt = toWei(input);
+    // [L-03] Contract enforces >= 1 TitanX minimum
+    if (weiAmt < 1_000_000_000_000_000_000n) {
+      setTx({ phase: "error", msg: "Minimum burn is 1 TitanX" });
+      return;
+    }
     try {
       setTx({ phase: "pending", msg: "Approving TitanX...", sub: "Confirm in wallet" });
       const allowance = await titanX.allowance(account, ADDRESSES.genesisBurn);
@@ -72,6 +80,22 @@ export default function Genesis() {
       setTx({ phase: "error", msg: err.reason || err.message?.slice(0, 100) || "Transaction failed" });
     }
   }, [genesis, titanX, account, input, amt, immediate]);
+
+  // End Genesis TX — permissionless, callable by anyone after genesis ends
+  const handleEndGenesis = useCallback(async () => {
+    if (!genesis) return;
+    try {
+      setTx({ phase: "pending", msg: "Finalizing Genesis...", sub: "Creating Uniswap V3 LP..." });
+      // [M-01] minWETHOut must be > 0; use 1 wei as floor (real value via quote on mainnet)
+      // [M-02] caller-supplied deadline: 10 minutes from now
+      const deadline = Math.floor(Date.now() / 1000) + 600;
+      const tx = await genesis.endGenesis(1n, BigInt(deadline));
+      await tx.wait();
+      setTx({ phase: "success", msg: "Genesis Finalized!", sub: "Uniswap V3 LP created & locked forever" });
+    } catch (err) {
+      setTx({ phase: "error", msg: err.reason || err.message?.slice(0, 100) || "Finalize failed" });
+    }
+  }, [genesis]);
 
   // Claim TX
   const handleClaim = useCallback(async () => {
@@ -159,9 +183,15 @@ export default function Genesis() {
                   </>
                 )}
               </div>
+              {/* endGenesis — creates the LP, callable by anyone */}
+              {!lpStatus?.created && (
+                <button className="hb-btn mb-3" onClick={handleEndGenesis}>
+                  🔗 Finalize Genesis & Create LP
+                </button>
+              )}
               {claimable > 0n && (
                 <button className="hb-btn !from-green-600 !to-emerald-500" onClick={handleClaim}>
-                  🎁 Claim {fmtETH(claimable)} Vested HBURN
+                  🎁 Claim {fmt(claimable)} Vested HBURN
                 </button>
               )}
             </div>
@@ -267,6 +297,28 @@ export default function Genesis() {
               </div>
               <p className="text-[10px] text-txt-3 leading-relaxed">
                 At Genesis end, the contract auto-creates a Uniswap V3 LP from the accumulated reserves. No insider tokens. Fully trustless.
+              </p>
+            </div>
+          </div>
+
+          {/* Trustless Treasury */}
+          <div className="hb-card border-amber-500/15 bg-gradient-to-br from-amber-500/5 to-orange-500/3">
+            <div className="hb-label"><span className="dot" style={{ background: "#f59e0b" }} /> Trustless Treasury (22%)</div>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] text-txt-3 uppercase tracking-wider">TitanX in Contract</span>
+                <span className="font-display font-bold text-sm text-amber-400">
+                  {treasuryStatus ? fmt(treasuryStatus.titanX) : "—"}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] text-txt-3 uppercase tracking-wider">Status</span>
+                <span className={`text-xs font-bold ${treasuryStatus?.staked ? "text-emerald-400" : "text-amber-400"}`}>
+                  {treasuryStatus?.staked ? "Staked 3,500 Days" : "Awaiting Genesis End"}
+                </span>
+              </div>
+              <p className="text-[10px] text-txt-3 leading-relaxed">
+                22% of all Genesis TitanX stays in the contract. After Genesis, anyone can call stakeTreasury() to lock it for 3,500 days. ETH yield flows to BuyAndBurn.
               </p>
             </div>
           </div>
