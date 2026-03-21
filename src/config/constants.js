@@ -1,28 +1,29 @@
 // ─── Deployed Addresses (Sepolia) ─────────────────────────────────
 // Update these after mainnet deployment
+// ─── Deployed Addresses (Mainnet) ───────────────────────────────────────────
 export const ADDRESSES = {
-  hellBurnToken: "0x14DF8A2370D4D6DEE12237a895707A53dB3e965a",
-  genesisBurn: "0x6F4Be833f867Ce18F83d5Eeca025447A9249B799",
-  burnEpochs: "0xE6681E225d4b6538C148ec1E1CEaB203BC098bE7",
-  hellBurnStaking: "0x8FE3E031C7114Bb7c254B9f49d646d0d8F8B509B",
-  buyAndBurn: "0xF32137fB1C133A75777440A604772a82296B44e0",
-  titanX: "0xaA2Cb459f816F4E217700f6299aa1784cfB3facD",
-  dragonX: "0x77D4FEffa242B43Ef3Afc4f0642F2d9F94DE7453",
+  hellBurnToken:   "0xc4f13b2d48e851e13df10e962dc7ad1ed1201568",
+  genesisBurn:     "0xae0e254cd3832ef19401a7f069b9526fc9696693",
+  burnEpochs:      "0x473caB6E7589f53841344513FcFF49c2A944d486",
+  hellBurnStaking: "0xb85c0c20e5dbe081e8609ed2c0c0384d5afa198c",
+  buyAndBurn:      "0x5695fd32aae7107f4a44f4bbd21adf265a027cbb",
+  titanX:          "0xF19308F923582A6f7c465e5CE7a9Dc1BEC6665B1",
+  dragonX:         "0x96a5399D07896f757Bd4c6eF56461F58DB951862",
 };
 
-// ─── Chain ────────────────────────────────────────────────────────
-export const CHAIN_ID = 11155111; // Sepolia. Change to 1 for mainnet.
-export const CHAIN_NAME = "Sepolia";
-export const RPC_URL = "https://eth-sepolia.g.alchemy.com/v2/demo";
+// ─── Chain ───────────────────────────────────────────────────────────────────
+export const CHAIN_ID = 1; // Mainnet
+export const CHAIN_NAME = "Ethereum";
+export const RPC_URL = "https://eth-mainnet.g.alchemy.com/v2/demo";
 
-// ─── Tokenomics Constants ─────────────────────────────────────────
-export const LP_RESERVE_PERCENT = 3; // 3% of minted HBURN → LP reserve
+// ─── Tokenomics Constants ────────────────────────────────────────────────────
+export const LP_RESERVE_PERCENT = 3;
 export const GENESIS_DURATION_DAYS = 28;
-export const GENESIS_DURATION_HOURS = 12; // Beta: 12h instead of 28 days
+export const GENESIS_DURATION_HOURS = 672; // 28 * 24
 export const EPOCH_DURATION_DAYS = 8;
-export const MAX_STAKE_DAYS = 24;    // Beta: 24 days (mainnet: 3500)
-export const MIN_STAKE_DAYS = 1;      // Beta: 1 day (mainnet: 28)
-export const STAKE_UNIT_SECONDS = 3600; // Beta: 1 "day" = 1 hour (mainnet: 86400)
+export const MAX_STAKE_DAYS = 3500;  // Mainnet
+export const MIN_STAKE_DAYS = 28;    // Mainnet
+export const STAKE_UNIT_SECONDS = 86400; // Mainnet: 1 day = 86400s
 
 export const WEEKS = [
   { week: 1, ratio: 100, bonus: 115, label: "1:1", bonusLabel: "+15%" },
@@ -39,11 +40,11 @@ export const TITANX_DISTRIBUTION = [
 ];
 
 export const STAKE_TIERS = [
-  { name: "Bronze", minDays: 1, color: "#cd7f32" },     // Beta (mainnet: 28)
-  { name: "Silver", minDays: 4, color: "#c0c0c0" },     // Beta (mainnet: 90)
-  { name: "Gold", minDays: 8, color: "#ffd700" },        // Beta (mainnet: 369)
-  { name: "Platinum", minDays: 16, color: "#e5e4e2" },   // Beta (mainnet: 888)
-  { name: "Diamond", minDays: 24, color: "#b9f2ff" },    // Beta (mainnet: 3500)
+  { name: "Bronze",   minDays: 28,   color: "#cd7f32" },
+  { name: "Silver",   minDays: 90,   color: "#c0c0c0" },
+  { name: "Gold",     minDays: 369,  color: "#ffd700" },
+  { name: "Platinum", minDays: 888,  color: "#e5e4e2" },
+  { name: "Diamond",  minDays: 3500, color: "#b9f2ff" },
 ];
 
 export const getTier = (days) => {
