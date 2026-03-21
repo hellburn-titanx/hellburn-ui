@@ -26,7 +26,7 @@ export default function Genesis() {
     if (!genesis || !account) return;
     (async () => {
       try {
-        const [bal, hBal, w, claim, burned, minted, end, ended, lp] = await Promise.all([
+        const [bal, hBal, w, claim, burned, minted, end, ended, lp, treasury] = await Promise.all([
           titanX.balanceOf(account),
           hburn.balanceOf(account),
           genesis.currentWeek(),
