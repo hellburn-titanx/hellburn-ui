@@ -264,6 +264,9 @@ export default function Layout() {
                   className="block text-xs text-txt-2 hover:text-fire-3 transition-colors">
                   🔍 SpyWolf Security Audit
                 </a>
+				<a href="/HellBurn_KYC.pdf" target="_blank" rel="noopener noreferrer" className="block text-xs text-txt-2 hover:text-fire-3 transition-colors">
+					✅ SpyWolf KYC Verified
+				</a>
               </div>
             </div>
 
@@ -326,7 +329,7 @@ export default function Layout() {
           {/* Bottom bar */}
           <div className="mt-8 pt-6 border-t border-dark-5 flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="text-[10px] text-txt-3">
-              ✅ Smart contracts audited by <a href="/HellBurn_Audit_SpyWolf.pdf" target="_blank" rel="noopener noreferrer" className="underline hover:text-fire-3 transition-colors">SpyWolf Security</a>. Use at your own risk. DYOR.
+              ✅ Smart contracts audited & KYC verified by <a href="/HellBurn_Audit_SpyWolf.pdf" target="_blank" rel="noopener noreferrer" className="underline hover:text-fire-3 transition-colors">SpyWolf Security</a>. Use at your own risk. DYOR.
             </p>
             <p className="text-[10px] text-txt-3">
               HellBurn Protocol © {new Date().getFullYear()} — Built on TitanX
