@@ -267,9 +267,12 @@ export default function Layout() {
 				<a href="/HellBurn_KYC.pdf" target="_blank" rel="noopener noreferrer" className="block text-xs text-txt-2 hover:text-fire-3 transition-colors">
 					✅ SpyWolf KYC Verified
 				</a>
+				<a href="/HellBurnsVault_Whitepaper_EN.pdf" target="_blank" rel="noopener noreferrer"
+				  className="block text-xs text-txt-2 hover:text-fire-3 transition-colors">
+				  🔥 HellBurn's Vault — Whitepaper (Draft)
+				</a>
               </div>
             </div>
-
             {/* Ecosystem */}
             <div>
               <h4 className="text-[10px] uppercase tracking-[2px] text-txt-3 mb-3">Ecosystem</h4>
